@@ -6,12 +6,33 @@ function activate(context) {
     if (!editor) return;
 
     let path = editor.document.uri.fsPath;
-    const sel = editor.selection;
 
-    if (!sel.isEmpty) {
-      const start = sel.start.line + 1;
-      const end = sel.end.line + 1;
-      path += start === end ? `:${start}` : `:${start}-${end}`;
+    const allowMultiple = vscode.workspace
+      .getConfiguration('copyPathWithLines')
+      .get('allowMultipleSelections', true);
+
+    const selections = allowMultiple ? editor.selections : [editor.selection];
+
+    const intervals = selections
+      .filter((sel) => !sel.isEmpty)
+      .map((sel) => [sel.start.line + 1, sel.end.line + 1])
+      .sort((a, b) => a[0] - b[0]);
+
+    const merged = [];
+    for (const [start, end] of intervals) {
+      const last = merged[merged.length - 1];
+      if (last && start <= last[1]) {
+        last[1] = Math.max(last[1], end);
+      } else {
+        merged.push([start, end]);
+      }
+    }
+
+    if (merged.length > 0) {
+      const suffix = merged
+        .map(([start, end]) => (start === end ? `${start}` : `${start}-${end}`))
+        .join('&');
+      path += `:${suffix}`;
     }
 
     await vscode.env.clipboard.writeText(path);
@@ -19,6 +40,6 @@ function activate(context) {
   context.subscriptions.push(cmd);
 }
 
-function deactivate() {}
+function deactivate() { }
 
 module.exports = { activate, deactivate };

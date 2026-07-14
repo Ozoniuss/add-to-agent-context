@@ -30,6 +30,17 @@
         "command": "copyPathWithLines.copy",
         "title": "Copy Path With Line Selection"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Copy Path With Line Selection",
+      "properties": {
+        "copyPathWithLines.allowMultipleSelections": {
+          "type": "boolean",
+          "default": true,
+          "description": "Allow multiple selections",
+          "markdownDescription": "When multiple selections exist (e.g. from multiple cursors), merge the line ranges of all selections into the copied path (e.g. `foo.ts:11-22&34-46`). When disabled, only the primary selection is used."
+        }
+      }
+    }
   }
 }
