@@ -6,7 +6,7 @@ appending the selected line range when there is a selection.
 - No selection → `/Users/you/project/src/foo.ts`
 - Single line selected → `/Users/you/project/src/foo.ts:42`
 - Range selected → `/Users/you/project/src/foo.ts:42-58`
-- Multiple selections → `/Users/you/project/src/foo.ts:11-22&34-46`
+- Multiple selections → `/Users/you/project/src/foo.ts:11-22,34-46`
 
 ## Multiple selections
 

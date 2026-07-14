@@ -31,7 +31,7 @@ function activate(context) {
     if (merged.length > 0) {
       const suffix = merged
         .map(([start, end]) => (start === end ? `${start}` : `${start}-${end}`))
-        .join('&');
+        .join(',');
       path += `:${suffix}`;
     }
 
