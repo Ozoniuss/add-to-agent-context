@@ -1,0 +1,35 @@
+{
+  "name": "copy-path-with-lines",
+  "displayName": "Copy Path With Line Selection",
+  "description": "Copies the active file's full path, appending the selected line range when there is a selection.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "copy",
+    "path",
+    "line",
+    "selection",
+    "clipboard"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ozoniuss/copy-path-with-lines.git"
+  },
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "copyPathWithLines.copy",
+        "title": "Copy Path With Line Selection"
+      }
+    ]
+  }
+}
