@@ -45,7 +45,7 @@ have a text selection in an editor:
 }
 ```
 
-[Example Video](./assets/explorer.webm)
+<video src="https://github.com/Ozoniuss/copy-path-with-lines/raw/main/assets/editor.mp4" controls></video>
 
 ### Copying file paths from explorer
 
@@ -62,7 +62,7 @@ work by default):
 }
 ```
 
-[Example Video](./assets/explorer.webm)
+<video src="https://github.com/Ozoniuss/copy-path-with-lines/raw/main/assets/explorer.mp4" controls></video>
 
 ## Install from source
 
