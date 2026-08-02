@@ -33,17 +33,36 @@ following rebind to your keybindings.json file to only make it trigger when you
 have a text selection in an editor:
 
 ```json
-    {
-        "key": "shift+alt+c",
-        "command": "-copyFilePath",
-        "when": "editorTextFocus"
-    },
-    {
-        "key": "shift+alt+c",
-        "command": "copyPathWithLines.copy",
-        "when": "editorTextFocus"
-    }
+{
+    "key": "shift+alt+c",
+    "command": "-copyFilePath",
+    "when": "editorTextFocus"
+},
+{
+    "key": "shift+alt+c",
+    "command": "copyPathWithLines.copy",
+    "when": "editorTextFocus"
+}
 ```
+
+[Example Video](./assets/explorer.webm)
+
+### Copying file paths from explorer
+
+Sometimes it is also useful to just copy the location directly from the explorer
+sidebar, if you don't want to also open the file in an editor. This can be
+achieved without the extension using the following remap (on Windows it should
+work by default):
+
+```json
+{
+    "key": "shift+alt+c",
+    "command": "copyFilePath",
+    "when": "filesExplorerFocus"
+}
+```
+
+[Example Video](./assets/explorer.webm)
 
 ## Install from source
 
