@@ -45,7 +45,7 @@ have a text selection in an editor:
 }
 ```
 
-[Example Video](./assets/editor.mp4)
+[![Example Video](./assets/editor-thumb.png)](./assets/editor.mp4)
 
 ### Copying file paths from explorer
 
@@ -62,7 +62,7 @@ work by default):
 }
 ```
 
-[Example Video](./assets/explorer.mp4)
+[![Example Video](./assets/explorer-thumb.png)](./assets/explorer.mp4)
 
 ## Install from source
 
