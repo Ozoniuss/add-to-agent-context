@@ -1,8 +1,8 @@
 {
   "name": "copy-path-with-lines",
   "displayName": "Copy Path With Line Selection",
-  "description": "Copies the active file's full path, appending the selected line range when there is a selection.",
-  "version": "0.0.1",
+  "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
+  "version": "0.1.0",
   "publisher": "local",
   "engines": {
     "vscode": "^1.75.0"
@@ -15,7 +15,11 @@
     "path",
     "line",
     "selection",
-    "clipboard"
+    "clipboard",
+    "agent",
+    "context",
+    "claude",
+    "codex"
   ],
   "license": "MIT",
   "repository": {
@@ -29,6 +33,14 @@
       {
         "command": "copyPathWithLines.copy",
         "title": "Copy Path With Line Selection"
+      },
+      {
+        "command": "copyPathWithLines.sendToAgent",
+        "title": "Add Path With Line Selection to Agent"
+      },
+      {
+        "command": "copyPathWithLines.pickAction",
+        "title": "Copy Path With Line Selection: Choose Destination"
       }
     ],
     "configuration": {
@@ -39,6 +51,70 @@
           "default": true,
           "description": "Allow multiple selections",
           "markdownDescription": "When multiple selections exist (e.g. from multiple cursors), merge the line ranges of all selections into the copied path (e.g. `foo.ts:11-22,34-46`). When disabled, only the primary selection is used."
+        },
+        "copyPathWithLines.revealOnSend": {
+          "type": "boolean",
+          "default": true,
+          "description": "Reveal the agent's view before adding to its context",
+          "markdownDescription": "Before adding to an agent's context, run that agent's `revealCommand` to open and focus its view. Disable to leave the sidebar untouched."
+        },
+        "copyPathWithLines.agents": {
+          "type": "array",
+          "description": "Agents that can receive the path with line selection",
+          "markdownDescription": "Agent extensions that `copyPathWithLines.sendToAgent` and `copyPathWithLines.pickAction` can target. Each entry names a command contributed by that extension; an agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing. Bind the commands yourself in `keybindings.json` (see the README).",
+          "default": [
+            {
+              "id": "claude",
+              "label": "Claude Code",
+              "extensionId": "anthropic.claude-code",
+              "command": "claude-vscode.insertAtMention",
+              "perRangeInvocation": true
+            },
+            {
+              "id": "codex",
+              "label": "Codex",
+              "extensionId": "openai.chatgpt",
+              "command": "chatgpt.addToThread",
+              "perRangeInvocation": true
+            }
+          ],
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "command"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable identifier, used to remember the last agent you sent to"
+              },
+              "label": {
+                "type": "string",
+                "description": "Name shown in the destination picker"
+              },
+              "extensionId": {
+                "type": "string",
+                "description": "Publisher-qualified extension id, checked to tell 'not installed' from 'command renamed'"
+              },
+              "command": {
+                "type": "string",
+                "description": "Command that adds the current editor selection to the agent's context"
+              },
+              "revealCommand": {
+                "type": "string",
+                "description": "Command that opens and focuses the agent's view",
+                "markdownDescription": "Command that opens and focuses the agent's view. Usually unnecessary: both default agents reveal themselves as part of adding to context. Set it only for an agent that does not."
+              },
+              "perRangeInvocation": {
+                "type": "boolean",
+                "default": false,
+                "description": "Invoke the command once per merged line range",
+                "markdownDescription": "Agent commands read only the primary selection, so multiple cursors would collapse to one range. When enabled, each merged range is selected in turn and the command invoked for each, so every range reaches the agent."
+              }
+            }
+          }
         }
       }
     }

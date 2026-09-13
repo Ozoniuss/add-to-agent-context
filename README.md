@@ -64,6 +64,42 @@ work by default):
 
 https://github.com/user-attachments/assets/bbfc8b1b-12e0-4c62-96b3-948550576766
 
+## Adding to an agent's context
+
+You can also add the selection directly to an agent's context using `Ctrl+L`,
+similar to Cursor's implementation. This currently works with Claude Code and
+Codex extensions.
+
+```json
+{
+    "key": "ctrl+l",
+    "command": "copyPathWithLines.sendToAgent",
+    "when": "editorTextFocus"
+},
+{
+    "key": "ctrl+l",
+    "command": "copyPathWithLines.pickAction",
+    "when": "editorTextFocus && !auxiliaryBarVisible"
+},
+{
+    "key": "ctrl+l",
+    "command": "copyPathWithLines.sendToAgent",
+    "args": "claude",
+    "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
+},
+{
+    "key": "ctrl+l",
+    "command": "copyPathWithLines.sendToAgent",
+    "args": "codex",
+    "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
+},
+{
+    "key": "ctrl+shift+l",
+    "command": "copyPathWithLines.pickAction",
+    "when": "editorTextFocus"
+}
+```
+
 ## Install from source
 
 ```bash
@@ -75,10 +111,10 @@ Then install into your editor of choice:
 
 ```bash
 # VS Code
-code --install-extension copy-path-with-lines-0.0.1.vsix
+code --install-extension copy-path-with-lines-0.1.0.vsix
 
 # Cursor
-cursor --install-extension copy-path-with-lines-0.0.1.vsix
+cursor --install-extension copy-path-with-lines-0.1.0.vsix
 ```
 
 Reload the window afterward.
