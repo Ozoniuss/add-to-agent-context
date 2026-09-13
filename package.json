@@ -1,6 +1,6 @@
 {
-  "name": "copy-path-with-lines",
-  "displayName": "Copy Path With Line Selection",
+  "name": "add-to-agent-context",
+  "displayName": "Add to Agent Context",
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
   "version": "0.1.0",
   "publisher": "local",
@@ -24,44 +24,47 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Ozoniuss/copy-path-with-lines.git"
+    "url": "https://github.com/Ozoniuss/add-to-agent-context.git"
   },
   "activationEvents": [],
   "main": "./extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "copyPathWithLines.copy",
-        "title": "Copy Path With Line Selection"
+        "command": "addToAgentContext.copy",
+        "title": "Copy Path with Lines",
+        "category": "Add to Agent Context"
       },
       {
-        "command": "copyPathWithLines.sendToAgent",
-        "title": "Add Path With Line Selection to Agent"
+        "command": "addToAgentContext.sendToAgent",
+        "title": "Add Path With Line Selection to Agent",
+        "category": "Add to Agent Context"
       },
       {
-        "command": "copyPathWithLines.pickAction",
-        "title": "Copy Path With Line Selection: Choose Destination"
+        "command": "addToAgentContext.pickAction",
+        "title": "Choose Destination",
+        "category": "Add to Agent Context"
       }
     ],
     "configuration": {
-      "title": "Copy Path With Line Selection",
+      "title": "Add to Agent Context",
       "properties": {
-        "copyPathWithLines.allowMultipleSelections": {
+        "addToAgentContext.allowMultipleSelections": {
           "type": "boolean",
           "default": true,
           "description": "Allow multiple selections",
           "markdownDescription": "When multiple selections exist (e.g. from multiple cursors), merge the line ranges of all selections into the copied path (e.g. `foo.ts:11-22,34-46`). When disabled, only the primary selection is used."
         },
-        "copyPathWithLines.revealOnSend": {
+        "addToAgentContext.revealOnSend": {
           "type": "boolean",
           "default": true,
           "description": "Reveal the agent's view before adding to its context",
           "markdownDescription": "Before adding to an agent's context, run that agent's `revealCommand` to open and focus its view. Disable to leave the sidebar untouched."
         },
-        "copyPathWithLines.agents": {
+        "addToAgentContext.agents": {
           "type": "array",
           "description": "Agents that can receive the path with line selection",
-          "markdownDescription": "Agent extensions that `copyPathWithLines.sendToAgent` and `copyPathWithLines.pickAction` can target. Each entry names a command contributed by that extension; an agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing. Bind the commands yourself in `keybindings.json` (see the README).",
+          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent` and `addToAgentContext.pickAction` can target. Each entry names a command contributed by that extension; an agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing. Bind the commands yourself in `keybindings.json` (see the README).",
           "default": [
             {
               "id": "claude",

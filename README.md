@@ -1,4 +1,4 @@
-# Copy Path With Line Selection
+# Add to Agent Context
 
 A VS Code extension that copies the active file's full path to the clipboard,
 appending the selected line range when there is a selection.
@@ -21,12 +21,12 @@ are collected, sorted, and merged into a single suffix. Two ranges that touch
 (`11-26`).
 
 This is controlled by the **Allow multiple selections**
-(`copyPathWithLines.allowMultipleSelections`) setting, which is enabled by
+(`addToAgentContext.allowMultipleSelections`) setting, which is enabled by
 default. Disable it to only use the primary selection.
 
 ## Usage
 
-You can run **Copy Path With Line Selection** from the Command Palette, however
+You can run **Copy Path with Lines** from the Command Palette, however
 it makes much more sense to bind this to a shortcut. I wrote this as an overwrite
 for the `copyFilePath` shortcut when I am working in an editor. You can add the
 following rebind to your keybindings.json file to only make it trigger when you
@@ -40,7 +40,7 @@ have a text selection in an editor:
 },
 {
     "key": "shift+alt+c",
-    "command": "copyPathWithLines.copy",
+    "command": "addToAgentContext.copy",
     "when": "editorTextFocus"
 }
 ```
@@ -73,29 +73,29 @@ Codex extensions.
 ```json
 {
     "key": "ctrl+l",
-    "command": "copyPathWithLines.sendToAgent",
+    "command": "addToAgentContext.sendToAgent",
     "when": "editorTextFocus"
 },
 {
     "key": "ctrl+l",
-    "command": "copyPathWithLines.pickAction",
+    "command": "addToAgentContext.pickAction",
     "when": "editorTextFocus && !auxiliaryBarVisible"
 },
 {
     "key": "ctrl+l",
-    "command": "copyPathWithLines.sendToAgent",
+    "command": "addToAgentContext.sendToAgent",
     "args": "claude",
     "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
 },
 {
     "key": "ctrl+l",
-    "command": "copyPathWithLines.sendToAgent",
+    "command": "addToAgentContext.sendToAgent",
     "args": "codex",
     "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
 },
 {
     "key": "ctrl+shift+l",
-    "command": "copyPathWithLines.pickAction",
+    "command": "addToAgentContext.pickAction",
     "when": "editorTextFocus"
 }
 ```
@@ -111,10 +111,10 @@ Then install into your editor of choice:
 
 ```bash
 # VS Code
-code --install-extension copy-path-with-lines-0.1.0.vsix
+code --install-extension add-to-agent-context-0.1.0.vsix
 
 # Cursor
-cursor --install-extension copy-path-with-lines-0.1.0.vsix
+cursor --install-extension add-to-agent-context-0.1.0.vsix
 ```
 
 Reload the window afterward.

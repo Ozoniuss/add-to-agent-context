@@ -1,10 +1,10 @@
 const vscode = require('vscode');
 
-const LAST_AGENT_KEY = 'copyPathWithLines.lastAgentId';
+const LAST_AGENT_KEY = 'addToAgentContext.lastAgentId';
 
 function mergedRanges(editor) {
   const allowMultiple = vscode.workspace
-    .getConfiguration('copyPathWithLines')
+    .getConfiguration('addToAgentContext')
     .get('allowMultipleSelections', true);
 
   const selections = allowMultiple ? editor.selections : [editor.selection];
@@ -40,7 +40,7 @@ function formatPath(editor) {
 
 function configuredAgents() {
   const agents = vscode.workspace
-    .getConfiguration('copyPathWithLines')
+    .getConfiguration('addToAgentContext')
     .get('agents', []);
   return agents.filter((a) => a && a.id && a.label && a.command);
 }
@@ -60,7 +60,7 @@ async function availableAgents() {
 
 async function sendToAgent(agent, editor) {
   const revealOnSend = vscode.workspace
-    .getConfiguration('copyPathWithLines')
+    .getConfiguration('addToAgentContext')
     .get('revealOnSend', true);
 
   if (revealOnSend && agent.revealCommand) {
@@ -96,7 +96,7 @@ async function runAgentById(editor, agentId) {
 
   if (!agent) {
     vscode.window.showWarningMessage(
-      `No agent registered with id "${agentId}". Check copyPathWithLines.agents.`
+      `No agent registered with id "${agentId}". Check addToAgentContext.agents.`
     );
     return false;
   }
@@ -113,14 +113,14 @@ async function runAgentById(editor, agentId) {
 }
 
 function activate(context) {
-  const copy = vscode.commands.registerCommand('copyPathWithLines.copy', async () => {
+  const copy = vscode.commands.registerCommand('addToAgentContext.copy', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
     await vscode.env.clipboard.writeText(formatPath(editor));
   });
 
   const send = vscode.commands.registerCommand(
-    'copyPathWithLines.sendToAgent',
+    'addToAgentContext.sendToAgent',
     async (agentId) => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
@@ -133,11 +133,11 @@ function activate(context) {
           return;
         }
       }
-      await vscode.commands.executeCommand('copyPathWithLines.pickAction');
+      await vscode.commands.executeCommand('addToAgentContext.pickAction');
     }
   );
 
-  const pick = vscode.commands.registerCommand('copyPathWithLines.pickAction', async () => {
+  const pick = vscode.commands.registerCommand('addToAgentContext.pickAction', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
 
