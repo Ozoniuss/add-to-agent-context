@@ -9,6 +9,7 @@ out/test/**
 tsconfig.json
 assets/icon.svg
 assets/video_demo.mp4
+assets/video_demo_2.mp4
 .nvmrc
 CONTRIBUTING.md
 AGENTS.md
