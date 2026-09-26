@@ -286,12 +286,16 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   });
 
+  const copyFiles = vscode.commands.registerCommand('addToAgentContext.copyFilePaths', async () => {
+    await vscode.commands.executeCommand('copyFilePath');
+  });
+
   const pickFiles = vscode.commands.registerCommand(
     'addToAgentContext.pickFileAction',
     pickFileAgent
   );
 
-  context.subscriptions.push(copy, send, pick, pickFiles);
+  context.subscriptions.push(copy, send, pick, copyFiles, pickFiles);
 }
 
 export function deactivate(): void { }

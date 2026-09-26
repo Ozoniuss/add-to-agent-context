@@ -55,6 +55,11 @@
         "category": "Add to Agent Context"
       },
       {
+        "command": "addToAgentContext.copyFilePaths",
+        "title": "Copy Explorer Selection Paths",
+        "category": "Add to Agent Context"
+      },
+      {
         "command": "addToAgentContext.pickFileAction",
         "title": "Add Explorer Selection to Agent",
         "category": "Add to Agent Context"
@@ -73,7 +78,7 @@
       },
       {
         "key": "ctrl+'",
-        "command": "copyFilePath",
+        "command": "addToAgentContext.copyFilePaths",
         "when": "filesExplorerFocus && !inputFocus"
       },
       {

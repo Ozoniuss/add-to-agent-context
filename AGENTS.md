@@ -16,6 +16,12 @@ developer and finds iterative code easier to read.
 - Update the `contributes` section of [package.json](package.json) when adding,
   renaming or changing commands, keybindings or settings, so the extension
   manifest matches the code.
+- Keep the agent fields documented in the README's "Customizing agents" section
+  in sync with the `addToAgentContext.agents` schema in `package.json`. The same
+  goes for the "Default agents" table and the setting's `default` value.
+- Keep the README's "Default keybindings" section in sync with the
+  `keybindings` in `package.json` whenever a default keybinding is added,
+  removed or changed.
 
 ## AI contributions
 

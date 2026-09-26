@@ -8,3 +8,6 @@ out/test/**
 tsconfig.json
 assets/icon.svg
 .nvmrc
+CONTRIBUTING.md
+AGENTS.md
+CLAUDE.md
