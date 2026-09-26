@@ -296,6 +296,191 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   context.subscriptions.push(copy, send, pick, copyFiles, pickFiles);
+  registerSelectionPopup(context);
+}
+
+function selectionPopupEnabled(): boolean {
+  return vscode.workspace
+    .getConfiguration('addToAgentContext')
+    .get<boolean>('selectionPopup', true);
+}
+
+function isInsideSelection(editor: vscode.TextEditor, position: vscode.Position): boolean {
+  for (const selection of editor.selections) {
+    if (!selection.isEmpty && selection.contains(position)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// best effort approach to detect a double click. it will still show the popup
+// if you move the mouse just a bit, but I like sometimes to double click on 
+// symbols randomly (it's like fidgeting) or to see in which other places they
+// show up.
+function isDoubleClickedWord(
+  document: vscode.TextDocument,
+  selection: vscode.Selection,
+  previous: readonly vscode.Selection[]
+): boolean {
+  const word = document.getWordRangeAtPosition(selection.start);
+  if (!word || !word.isEqual(selection)) {
+    return false;
+  }
+  for (const old of previous) {
+    if (old.isEmpty && word.contains(old.active)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function sameSelections(a: readonly vscode.Selection[], b: readonly vscode.Selection[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (!a[i].isEqual(b[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function firstNewSelection(
+  current: readonly vscode.Selection[],
+  previous: readonly vscode.Selection[]
+): vscode.Selection | undefined {
+  for (const selection of current) {
+    let existed = false;
+    for (const old of previous) {
+      if (old.isEqual(selection)) {
+        existed = true;
+        break;
+      }
+    }
+    if (!existed) {
+      return selection;
+    }
+  }
+  return undefined;
+}
+
+// https://stackoverflow.com/questions/7381974/which-characters-need-to-be-escaped-in-html
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function registerSelectionPopup(context: vscode.ExtensionContext): void {
+  const provider = vscode.languages.registerHoverProvider('*', {
+    async provideHover(document, position) {
+      if (!selectionPopupEnabled()) {
+        return undefined;
+      }
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || editor.document !== document) {
+        return undefined;
+      }
+      if (!isInsideSelection(editor, position)) {
+        return undefined;
+      }
+
+      const links: string[] = [];
+      for (const agent of await availableAgents()) {
+        if (!agent.available) {
+          continue;
+        }
+        // needed to turn agent names to links in hover
+        const args = encodeURIComponent(JSON.stringify([agent.id]));
+        // send html to avoid the tooltip displayed when hovering over the actual
+        // link text
+        links.push(
+          `<a href="command:addToAgentContext.sendToAgent?${args}">$(comment-discussion) Add to ${escapeHtml(agent.label)}</a>`
+        );
+      }
+      links.push('<a href="command:addToAgentContext.copy">$(clippy) Copy to clipboard</a>');
+
+      const markdown = new vscode.MarkdownString(links.join('&nbsp;&nbsp;|&nbsp;&nbsp;'), true);
+      markdown.isTrusted = true;
+      markdown.supportHtml = true;
+      return new vscode.Hover(markdown);
+    },
+  });
+
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let popupShown = false;
+  let previousEditor: vscode.TextEditor | undefined;
+  let previousSelections: readonly vscode.Selection[] = [];
+
+  const onSelection = vscode.window.onDidChangeTextEditorSelection(async (event) => {
+    if (!selectionPopupEnabled()) {
+      return;
+    }
+
+    // clear timer if I change the selection before the popup was shown
+    if (timer) {
+      clearTimeout(timer);
+      timer = undefined;
+    }
+
+    let previous: readonly vscode.Selection[] = [];
+    if (previousEditor === event.textEditor) {
+      previous = previousSelections;
+    }
+    previousEditor = event.textEditor;
+    previousSelections = event.selections;
+
+    if (event.kind !== vscode.TextEditorSelectionChangeKind.Mouse) {
+      return;
+    }
+
+    // clear previous popup when changing the selection
+    if (popupShown) {
+      popupShown = false;
+      await vscode.commands.executeCommand('editor.action.hideHover');
+    }
+
+    const newSelection = firstNewSelection(event.selections, previous);
+    if (!newSelection || newSelection.isEmpty) {
+      return;
+    }
+    if (isDoubleClickedWord(event.textEditor.document, newSelection, previous)) {
+      return;
+    }
+
+    const editor = event.textEditor;
+    const selections = event.selections;
+    timer = setTimeout(async () => {
+      timer = undefined;
+      if (vscode.window.activeTextEditor !== editor || !sameSelections(editor.selections, selections)) {
+        return;
+      }
+      if (!editor.selection.isEqual(newSelection)) {
+        const reordered: vscode.Selection[] = [newSelection];
+        for (const selection of selections) {
+          if (selection !== newSelection) {
+            reordered.push(selection);
+          }
+        }
+        editor.selections = reordered;
+      }
+      await vscode.commands.executeCommand('editor.action.showHover', { focus: 'noAutoFocus' });
+      popupShown = true;
+    }, 400);
+  });
+
+  context.subscriptions.push(provider, onSelection, {
+    dispose() {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    },
+  });
 }
 
 export function deactivate(): void { }

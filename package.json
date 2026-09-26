@@ -2,11 +2,11 @@
   "name": "add-to-agent-context",
   "displayName": "Add to Agent Context",
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "ozoniuss",
   "icon": "assets/icon.png",
   "engines": {
-    "vscode": "^1.75.0"
+    "vscode": "^1.108.0"
   },
   "categories": [
     "AI",
@@ -29,7 +29,9 @@
     "type": "git",
     "url": "https://github.com/Ozoniuss/add-to-agent-context.git"
   },
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "scripts": {
     "compile": "tsc -p .",
@@ -92,6 +94,12 @@
     "configuration": {
       "title": "Add to Agent Context",
       "properties": {
+        "addToAgentContext.selectionPopup": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a popup with a button for each available agent and a \"Copy to clipboard\" button after selecting text with the mouse, and when hovering over selected text",
+          "markdownDescription": "Show a popup next to the cursor after selecting text with the mouse (except when double-clicking a word), and when hovering over selected text. It has an **Add to _agent_** button for each available agent and a **Copy to clipboard** button."
+        },
         "addToAgentContext.agents": {
           "type": "object",
           "description": "Agents that can receive the path with line selection, keyed by agent id",
@@ -140,7 +148,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
-    "@types/vscode": "~1.75.0",
+    "@types/vscode": "~1.108.0",
     "@vscode/vsce": "^4.0.0",
     "typescript": "^7.0.2"
   }

@@ -46,6 +46,10 @@ In an editor:
 - To choose which agent to send the selection to, or to copy a `path:lines`
   reference to the clipboard, press `Ctrl+Shift+'` and pick from the list.
   (`addToAgentContext.pickAction`)
+- To do either with the mouse, select text by dragging. A popup appears next to
+  the cursor with an **Add to _agent_** button for each available agent, in the
+  order they appear in `addToAgentContext.agents`, and a **Copy to clipboard**
+  button.
 
 With nothing selected in the editor, the whole file is sent or copied. See
 [How selections are modelled](#how-selections-are-modelled) for what gets sent
