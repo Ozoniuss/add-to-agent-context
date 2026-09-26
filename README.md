@@ -66,8 +66,12 @@ In the explorer, with one or more files or folders selected:
 > Note that in the explorer, currently `Ctrl+'` only copies the paths instead of
 sending them to the last agent like it does in an editor. That's because not all
 agents have a command that accepts a file URI. In particular, Claude Code can
-only mention the file open in the active editor. The behavior will change once
-I find a reliable way to send to last agent.
+only mention the file open in the active editor, so it can't be sent files or
+folders from the explorer. I opened
+[anthropics/claude-code#97535](https://github.com/anthropics/claude-code/issues/97535)
+asking for a command that adds a file or folder to the chat, like Codex's
+`chatgpt.addFileToThread`. The behavior will change once I find a reliable way
+to send to last agent.
 
 ### How the last agent is detected and known limitations
 
