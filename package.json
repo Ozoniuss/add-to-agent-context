@@ -2,13 +2,15 @@
   "name": "add-to-agent-context",
   "displayName": "Add to Agent Context",
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publisher": "local",
   "icon": "assets/icon.png",
   "engines": {
     "vscode": "^1.75.0"
   },
   "categories": [
+    "AI",
+    "Chat",
     "Other"
   ],
   "keywords": [
@@ -93,7 +95,7 @@
         "addToAgentContext.agents": {
           "type": "object",
           "description": "Agents that can receive the path with line selection, keyed by agent id",
-          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent` and `addToAgentContext.pickAction` can target, keyed by a stable agent id (used to remember the last agent you sent to). Your entries are merged with the defaults: add a new key to add an agent, set only the fields you want to change on an existing one, or set it to `null` to remove it. Each entry needs a `command`, and is shown by its `label`, or its id when no label is set; an agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing. Bind the commands yourself in `keybindings.json` (see the README).",
+          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent`, `addToAgentContext.pickAction` and `addToAgentContext.pickFileAction` can target, keyed by a stable agent id (used to remember the last agent you sent to, and passed as `args` to `sendToAgent`). Your entries are merged with the defaults: add a new key to add an agent, set only the fields you want to change on an existing one, or set it to `null` to remove it. Each entry needs a `command`, and is shown by its `label`, or its id when no label is set. Set `fileCommand` to also offer the agent for files and folders selected in the explorer. An agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing.",
           "default": {
             "claude": {
               "label": "Claude Code",
