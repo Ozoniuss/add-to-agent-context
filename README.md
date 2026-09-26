@@ -180,6 +180,10 @@ for an example of custom keybindings.
 
 ## Demo
 
+Unfortunately my Fedora screen recorder does not show the mouse pointer for
+whatever reason. Still, I hope it's clear enough what the mouse does in each
+videos to understand how the extension works.
+
 Use with keyboard shortcuts:
 
 https://github.com/user-attachments/assets/239e6b06-a1f4-4708-ada0-205dfe9552ba
