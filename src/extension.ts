@@ -7,6 +7,7 @@ const LAST_AGENT_KEY = 'addToAgentContext.lastAgentId';
 interface AgentSetting {
   label?: string;
   command?: string;
+  fileCommand?: string;
   extensionId?: string;
 }
 
@@ -19,6 +20,11 @@ interface AgentConfig {
   /** Command that adds the current editor selection to the agent's context. */
   command: string;
   /**
+   * Command that adds a file or folder to the agent's context, called once per
+   * item with its `vscode.Uri` as the only argument.
+   */
+  fileCommand?: string;
+  /**
    * Publisher-qualified id of the extension providing the agent, e.g.
    * `anthropic.claude-code`. Used to report a missing extension; when omitted,
    * only `command` is checked.
@@ -30,6 +36,8 @@ interface AgentConfig {
 interface Agent extends AgentConfig {
   /** `installed` and `command` is registered, so the agent can be called. */
   available: boolean;
+  /** `installed` and `fileCommand` is set and registered. */
+  fileAvailable: boolean;
   /** The extension named by `extensionId` is present, or none was given. */
   installed: boolean;
 }
@@ -60,6 +68,7 @@ function configuredAgents(): AgentConfig[] {
       id,
       label,
       command: agent.command,
+      fileCommand: agent.fileCommand,
       extensionId: agent.extensionId,
     });
   }
@@ -76,7 +85,11 @@ async function availableAgents(): Promise<Agent[]> {
       installed = vscode.extensions.getExtension(agent.extensionId) !== undefined;
     }
     const available = installed && registered.has(agent.command);
-    result.push({ ...agent, installed, available });
+    let fileAvailable = false;
+    if (installed && agent.fileCommand) {
+      fileAvailable = registered.has(agent.fileCommand);
+    }
+    result.push({ ...agent, installed, available, fileAvailable });
   }
   return result;
 }
@@ -123,6 +136,73 @@ async function runAgentById(editor: vscode.TextEditor, agentId: string): Promise
 
   await sendToAgent(agent, editor);
   return true;
+}
+
+
+async function selectedExplorerUris(): Promise<vscode.Uri[]> {
+  const previous = await vscode.env.clipboard.readText();
+  let copied: string;
+  try {
+    await vscode.commands.executeCommand('copyFilePath');
+    copied = await vscode.env.clipboard.readText();
+  } finally {
+    await vscode.env.clipboard.writeText(previous);
+  }
+
+  const uris: vscode.Uri[] = [];
+  for (const line of copied.split(/\r?\n/)) {
+    if (line.trim() === '') {
+      continue;
+    }
+    uris.push(vscode.Uri.file(line));
+  }
+  return uris;
+}
+
+async function pickFileAgent(): Promise<void> {
+  const uris = await selectedExplorerUris();
+  if (uris.length === 0) {
+    return;
+  }
+
+  const paths: string[] = [];
+  for (const uri of uris) {
+    paths.push(uri.fsPath);
+  }
+
+  const items: (vscode.QuickPickItem & { fileCommand: string | null })[] = [
+    {
+      label: '$(clippy) Copy to clipboard',
+      description: paths.join(', '),
+      fileCommand: null,
+    },
+  ];
+  for (const agent of await availableAgents()) {
+    if (!agent.fileAvailable || !agent.fileCommand) {
+      continue;
+    }
+    items.push({
+      label: `$(comment-discussion) Send to ${agent.label}`,
+      fileCommand: agent.fileCommand,
+    });
+  }
+
+  let placeHolder = `Copy ${uris.length} paths, or add them to an agent`;
+  if (uris.length === 1) {
+    placeHolder = `Copy ${vscode.workspace.asRelativePath(uris[0])}, or add it to an agent`;
+  }
+  const choice = await vscode.window.showQuickPick(items, { placeHolder });
+  if (!choice) {
+    return;
+  }
+
+  if (choice.fileCommand === null) {
+    await vscode.env.clipboard.writeText(paths.join('\n'));
+    return;
+  }
+  for (const uri of uris) {
+    await vscode.commands.executeCommand(choice.fileCommand, uri);
+  }
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -206,7 +286,12 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   });
 
-  context.subscriptions.push(copy, send, pick);
+  const pickFiles = vscode.commands.registerCommand(
+    'addToAgentContext.pickFileAction',
+    pickFileAgent
+  );
+
+  context.subscriptions.push(copy, send, pick, pickFiles);
 }
 
 export function deactivate(): void { }

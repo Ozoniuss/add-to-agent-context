@@ -62,39 +62,65 @@ https://github.com/user-attachments/assets/bbfc8b1b-12e0-4c62-96b3-948550576766
 
 ## Adding to an agent's context
 
-You can also add the selection directly to an agent's context using `Ctrl+L`,
-similar to Cursor's implementation. This currently works with Claude Code and
+You can also add the selection directly to an agent's context using `Ctrl+'`,
+similar to Cursor's `Ctrl+L`. This currently works with Claude Code and
 Codex extensions.
 
 ```json
 {
-    "key": "ctrl+l",
+    "key": "ctrl+'",
     "command": "addToAgentContext.sendToAgent",
     "when": "editorTextFocus"
 },
 {
-    "key": "ctrl+l",
+    "key": "ctrl+'",
     "command": "addToAgentContext.pickAction",
     "when": "editorTextFocus && !auxiliaryBarVisible"
 },
 {
-    "key": "ctrl+l",
+    "key": "ctrl+'",
     "command": "addToAgentContext.sendToAgent",
     "args": "claude",
     "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
 },
 {
-    "key": "ctrl+l",
+    "key": "ctrl+'",
     "command": "addToAgentContext.sendToAgent",
     "args": "codex",
     "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
 },
 {
-    "key": "ctrl+shift+l",
+    "key": "ctrl+shift+'",
     "command": "addToAgentContext.pickAction",
     "when": "editorTextFocus"
 }
 ```
+
+### Adding files and folders from the explorer
+
+Select one or more items in the explorer and press `Ctrl+Shift+'` to either copy
+their paths to the clipboard (one per line) or pick an agent to add them to.
+Only agents with a `fileCommand` are offered, which currently means Codex.
+
+```json
+{
+    "key": "ctrl+shift+'",
+    "command": "addToAgentContext.pickFileAction",
+    "when": "filesExplorerFocus && !inputFocus"
+}
+```
+
+A command run from a keybinding doesn't receive the explorer selection, so the
+extension runs the built-in **Copy Path** to read it and then restores your
+clipboard.
+
+**Known limitation:** Claude Code can't receive files or folders from the
+explorer. Its only command for adding context, `claude-vscode.insertAtMention`,
+takes no arguments and always mentions the file open in the active editor, and
+it has no command that accepts a file path or URI (checked with Claude Code
+2.1.283). It is therefore not offered in this picker. To add a file to Claude
+Code, open it and use `Ctrl+'` with nothing selected, which mentions the whole
+file.
 
 ### Configuring agents
 
@@ -120,8 +146,9 @@ write what you want to change:
 
 Each agent needs a `command`, which is the command that adds the current editor
 selection to that agent's context. `label` is the name shown in the picker and
-defaults to the agent id. `extensionId` is optional and
-only used to report a missing extension. Both built-in agents open and focus their
+defaults to the agent id. `fileCommand` is the command that adds a file or folder,
+called with its URI, and enables the agent for the explorer picker. `extensionId`
+is optional and only used to report a missing extension. Both built-in agents open and focus their
 own panel when their command runs.
 
 The command is invoked once per selected line range, with that range as the

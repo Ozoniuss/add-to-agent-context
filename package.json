@@ -53,6 +53,11 @@
         "command": "addToAgentContext.pickAction",
         "title": "Choose Destination",
         "category": "Add to Agent Context"
+      },
+      {
+        "command": "addToAgentContext.pickFileAction",
+        "title": "Add Explorer Selection to Agent",
+        "category": "Add to Agent Context"
       }
     ],
     "configuration": {
@@ -71,7 +76,8 @@
             "codex": {
               "label": "Codex",
               "extensionId": "openai.chatgpt",
-              "command": "chatgpt.addToThread"
+              "command": "chatgpt.addToThread",
+              "fileCommand": "chatgpt.addFileToThread"
             }
           },
           "additionalProperties": {
@@ -91,6 +97,11 @@
               "command": {
                 "type": "string",
                 "description": "Command that adds the current editor selection to the agent's context"
+              },
+              "fileCommand": {
+                "type": "string",
+                "description": "Command that adds a file or folder to the agent's context, called with its URI",
+                "markdownDescription": "Command that adds a file or folder to the agent's context. Called once per item selected in the explorer, with that item's URI as the only argument. Agents without it are not offered by `addToAgentContext.pickFileAction`."
               }
             }
           }
