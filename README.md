@@ -211,20 +211,7 @@ The command is invoked once per selected line range, with that range as the
 editor's only selection, so every range reaches the agent even though agent
 commands usually read just the primary selection.
 
-## Install from source
+## Contributing
 
-```bash
-nvm use
-npm install
-npm test
-npm run install-extension
-```
-
-`npm run install-extension` packages `add-to-agent-context.vsix` and installs it
-into VS Code. For Cursor, run `npm run package` and then:
-
-```bash
-cursor --install-extension add-to-agent-context.vsix
-```
-
-Reload the window afterward.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the extension locally and
+how to submit changes.
