@@ -180,7 +180,13 @@ for an example of custom keybindings.
 
 ## Demo
 
+Use with keyboard shortcuts:
+
 https://github.com/user-attachments/assets/239e6b06-a1f4-4708-ada0-205dfe9552ba
+
+Use with mouse:
+
+https://github.com/user-attachments/assets/389899de-4577-46f1-9c24-c3c9f1a6df84
 
 ## How selections are modelled
 
