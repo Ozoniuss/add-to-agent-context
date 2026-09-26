@@ -3,7 +3,7 @@
   "displayName": "Add to Agent Context",
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
   "version": "1.0.0",
-  "publisher": "local",
+  "publisher": "ozoniuss",
   "icon": "assets/icon.png",
   "engines": {
     "vscode": "^1.75.0"
