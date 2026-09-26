@@ -9,6 +9,18 @@ See [Demo](#demo) for a demo video.
 
 ## Installation
 
+The extension is published on the
+[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=ozoniuss.add-to-agent-context).
+In VS Code, open the Extensions view (`Ctrl+Shift+X`), search for
+`Add to Agent Context` or `ozoniuss.add-to-agent-context`, and click
+**Install**. Or install it from the command line:
+
+```bash
+code --install-extension ozoniuss.add-to-agent-context
+```
+
+You can also install it from a `.vsix` file:
+
 1. Download the `.vsix` file from the latest
    [release](https://github.com/Ozoniuss/add-to-agent-context/releases/latest).
 2. Install it from the command line:
