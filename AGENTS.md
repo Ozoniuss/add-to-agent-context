@@ -21,7 +21,10 @@ developer and finds iterative code easier to read.
   goes for the "Default agents" table and the setting's `default` value.
 - Keep the README's "Default keybindings" section in sync with the
   `keybindings` in `package.json` whenever a default keybinding is added,
-  removed or changed.
+  removed or changed. In `package.json`, each keybinding sets `key` for Windows
+  and Linux and `mac` for macOS. The README shows them as they would appear in
+  a user's `keybindings.json`, which has no `mac` field, so it has one block
+  with the `key` values and a separate macOS block with the `mac` values.
 
 ## AI contributions
 

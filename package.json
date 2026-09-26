@@ -2,7 +2,7 @@
   "name": "add-to-agent-context",
   "displayName": "Add to Agent Context",
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "publisher": "ozoniuss",
   "icon": "assets/icon.png",
   "engines": {
@@ -72,21 +72,25 @@
     "keybindings": [
       {
         "key": "ctrl+'",
+        "mac": "cmd+'",
         "command": "addToAgentContext.sendToAgent",
         "when": "editorTextFocus"
       },
       {
         "key": "ctrl+shift+'",
+        "mac": "cmd+shift+'",
         "command": "addToAgentContext.pickAction",
         "when": "editorTextFocus"
       },
       {
         "key": "ctrl+'",
+        "mac": "cmd+'",
         "command": "addToAgentContext.copyFilePaths",
         "when": "filesExplorerFocus && !inputFocus"
       },
       {
         "key": "ctrl+shift+'",
+        "mac": "cmd+shift+'",
         "command": "addToAgentContext.pickFileAction",
         "when": "filesExplorerFocus && !inputFocus"
       }

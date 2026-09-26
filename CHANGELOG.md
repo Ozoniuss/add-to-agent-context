@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+
+- On macOS the default keybindings use `Cmd` instead of `Ctrl`.
+
 ## 1.1.0
 
 - Selecting text with the mouse shows a popup with an **Add to _agent_** button

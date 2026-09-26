@@ -41,10 +41,12 @@ terminal.
 
 In an editor:
 
-- To send the selection to the agent you last sent to, press `Ctrl+'`. The
-  first time, it opens the picker instead. (`addToAgentContext.sendToAgent`)
+- To send the selection to the agent you last sent to, press `Ctrl+'`
+  (`Cmd+'` on macOS). The first time, it opens the picker instead.
+  (`addToAgentContext.sendToAgent`)
 - To choose which agent to send the selection to, or to copy a `path:lines`
-  reference to the clipboard, press `Ctrl+Shift+'` and pick from the list.
+  reference to the clipboard, press `Ctrl+Shift+'`
+  (`Cmd+Shift+'` on macOS) and pick from the list.
   (`addToAgentContext.pickAction`)
 - To do either with the mouse, select text by dragging. A popup appears next to
   the cursor with an **Add to _agent_** button for each available agent, in the
@@ -57,11 +59,12 @@ when you select part of a line, several ranges, and so on.
 
 In the explorer, with one or more files or folders selected:
 
-- To copy their paths to the clipboard, one per line, press `Ctrl+'`.
-  (`addToAgentContext.copyFilePaths`, which runs VS Code's built-in
+- To copy their paths to the clipboard, one per line, press `Ctrl+'`
+  (`Cmd+'` on macOS). (`addToAgentContext.copyFilePaths`, which runs VS Code's built-in
   `copyFilePath`)
 - To copy the paths or add the files to an agent that supports it, press
-  `Ctrl+Shift+'` and pick from the list. (`addToAgentContext.pickFileAction`)
+  `Ctrl+Shift+'` (`Cmd+Shift+'` on macOS) and pick from the list.
+  (`addToAgentContext.pickFileAction`)
 
 > Note that in the explorer, currently `Ctrl+'` only copies the paths instead of
 sending them to the last agent like it does in an editor. That's because not all
@@ -84,7 +87,7 @@ one).
 
 There are ways to work around this. For example, if you always keep your agents
 in the secondary side bar you can overwrite the keybindings to something like
-this:
+this (you could use `cmd+'` instead of `ctrl+'` on macOS):
 
 ```json
 {
@@ -150,7 +153,9 @@ once per selected file or folder.
 
 ### Default keybindings
 
-The extension comes with these keybindings.
+The extension comes with these default keybindings.
+
+On Windows and Linux:
 
 ```json
 {
@@ -170,6 +175,31 @@ The extension comes with these keybindings.
 },
 {
     "key": "ctrl+shift+'",
+    "command": "addToAgentContext.pickFileAction",
+    "when": "filesExplorerFocus && !inputFocus"
+}
+```
+
+On macOS:
+
+```json
+{
+    "key": "cmd+'",
+    "command": "addToAgentContext.sendToAgent",
+    "when": "editorTextFocus"
+},
+{
+    "key": "cmd+shift+'",
+    "command": "addToAgentContext.pickAction",
+    "when": "editorTextFocus"
+},
+{
+    "key": "cmd+'",
+    "command": "addToAgentContext.copyFilePaths",
+    "when": "filesExplorerFocus && !inputFocus"
+},
+{
+    "key": "cmd+shift+'",
     "command": "addToAgentContext.pickFileAction",
     "when": "filesExplorerFocus && !inputFocus"
 }
