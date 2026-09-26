@@ -2,3 +2,8 @@
 .gitignore
 *.vsix
 node_modules/**
+src/**
+out/test/**
+**/*.map
+tsconfig.json
+.nvmrc

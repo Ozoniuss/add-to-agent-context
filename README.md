@@ -20,10 +20,6 @@ are collected, sorted, and merged into a single suffix. Two ranges that touch
 (one ends where the next begins, e.g. `11-22` and `22-26`) are merged into one
 (`11-26`).
 
-This is controlled by the **Allow multiple selections**
-(`addToAgentContext.allowMultipleSelections`) setting, which is enabled by
-default. Disable it to only use the primary selection.
-
 ## Usage
 
 You can run **Copy Path with Lines** from the Command Palette, however
@@ -100,21 +96,52 @@ Codex extensions.
 }
 ```
 
+### Configuring agents
+
+Agents are configured in `settings.json` under `addToAgentContext.agents`,
+keyed by agent id (the id you pass as `args` in the keybindings above). Your
+entries are merged with the built-in `claude` and `codex` ones, so you only
+write what you want to change:
+
+```jsonc
+"addToAgentContext.agents": {
+    // add a new agent
+    "my-agent": {
+        "label": "My Agent",
+        "extensionId": "someone.my-agent",
+        "command": "myAgent.addSelection"
+    },
+    // change one field of a built-in agent
+    "claude": { "label": "Claude" },
+    // remove a built-in agent
+    "codex": null
+}
+```
+
+Each agent needs a `command`, which is the command that adds the current editor
+selection to that agent's context. `label` is the name shown in the picker and
+defaults to the agent id. `extensionId` is optional and
+only used to report a missing extension. Both built-in agents open and focus their
+own panel when their command runs.
+
+The command is invoked once per selected line range, with that range as the
+editor's only selection, so every range reaches the agent even though agent
+commands usually read just the primary selection.
+
 ## Install from source
 
 ```bash
-npm install -g @vscode/vsce
-vsce package
+nvm use
+npm install
+npm test
+npm run install-extension
 ```
 
-Then install into your editor of choice:
+`npm run install-extension` packages `add-to-agent-context.vsix` and installs it
+into VS Code. For Cursor, run `npm run package` and then:
 
 ```bash
-# VS Code
-code --install-extension add-to-agent-context-0.1.0.vsix
-
-# Cursor
-cursor --install-extension add-to-agent-context-0.1.0.vsix
+cursor --install-extension add-to-agent-context.vsix
 ```
 
 Reload the window afterward.

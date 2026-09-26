@@ -27,7 +27,15 @@
     "url": "https://github.com/Ozoniuss/add-to-agent-context.git"
   },
   "activationEvents": [],
-  "main": "./extension.js",
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -watch -p .",
+    "test": "npm run compile && node --test out/test/",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package --out add-to-agent-context.vsix",
+    "install-extension": "npm run package && code --install-extension add-to-agent-context.vsix --force"
+  },
   "contributes": {
     "commands": [
       {
@@ -49,53 +57,31 @@
     "configuration": {
       "title": "Add to Agent Context",
       "properties": {
-        "addToAgentContext.allowMultipleSelections": {
-          "type": "boolean",
-          "default": true,
-          "description": "Allow multiple selections",
-          "markdownDescription": "When multiple selections exist (e.g. from multiple cursors), merge the line ranges of all selections into the copied path (e.g. `foo.ts:11-22,34-46`). When disabled, only the primary selection is used."
-        },
-        "addToAgentContext.revealOnSend": {
-          "type": "boolean",
-          "default": true,
-          "description": "Reveal the agent's view before adding to its context",
-          "markdownDescription": "Before adding to an agent's context, run that agent's `revealCommand` to open and focus its view. Disable to leave the sidebar untouched."
-        },
         "addToAgentContext.agents": {
-          "type": "array",
-          "description": "Agents that can receive the path with line selection",
-          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent` and `addToAgentContext.pickAction` can target. Each entry names a command contributed by that extension; an agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing. Bind the commands yourself in `keybindings.json` (see the README).",
-          "default": [
-            {
-              "id": "claude",
+          "type": "object",
+          "description": "Agents that can receive the path with line selection, keyed by agent id",
+          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent` and `addToAgentContext.pickAction` can target, keyed by a stable agent id (used to remember the last agent you sent to). Your entries are merged with the defaults: add a new key to add an agent, set only the fields you want to change on an existing one, or set it to `null` to remove it. Each entry needs a `command`, and is shown by its `label`, or its id when no label is set; an agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing. Bind the commands yourself in `keybindings.json` (see the README).",
+          "default": {
+            "claude": {
               "label": "Claude Code",
               "extensionId": "anthropic.claude-code",
-              "command": "claude-vscode.insertAtMention",
-              "perRangeInvocation": true
+              "command": "claude-vscode.insertAtMention"
             },
-            {
-              "id": "codex",
+            "codex": {
               "label": "Codex",
               "extensionId": "openai.chatgpt",
-              "command": "chatgpt.addToThread",
-              "perRangeInvocation": true
+              "command": "chatgpt.addToThread"
             }
-          ],
-          "items": {
-            "type": "object",
-            "required": [
-              "id",
-              "label",
-              "command"
+          },
+          "additionalProperties": {
+            "type": [
+              "object",
+              "null"
             ],
             "properties": {
-              "id": {
-                "type": "string",
-                "description": "Stable identifier, used to remember the last agent you sent to"
-              },
               "label": {
                 "type": "string",
-                "description": "Name shown in the destination picker"
+                "description": "Name shown in the destination picker; defaults to the agent id"
               },
               "extensionId": {
                 "type": "string",
@@ -104,22 +90,17 @@
               "command": {
                 "type": "string",
                 "description": "Command that adds the current editor selection to the agent's context"
-              },
-              "revealCommand": {
-                "type": "string",
-                "description": "Command that opens and focuses the agent's view",
-                "markdownDescription": "Command that opens and focuses the agent's view. Usually unnecessary: both default agents reveal themselves as part of adding to context. Set it only for an agent that does not."
-              },
-              "perRangeInvocation": {
-                "type": "boolean",
-                "default": false,
-                "description": "Invoke the command once per merged line range",
-                "markdownDescription": "Agent commands read only the primary selection, so multiple cursors would collapse to one range. When enabled, each merged range is selected in turn and the command invoked for each, so every range reaches the agent."
               }
             }
           }
         }
       }
     }
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/vscode": "~1.75.0",
+    "@vscode/vsce": "^4.0.0",
+    "typescript": "^7.0.2"
   }
 }
