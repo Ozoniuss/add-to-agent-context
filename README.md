@@ -5,6 +5,8 @@ extensions, or simply copies a reference to that selection to the clipboard.
 See [How selections are modelled](#how-selections-are-modelled) for how
 selections, including multiple ones, are turned into line ranges.
 
+See [Demo](#demo) for a demo video.
+
 ## Usage
 
 The idea is similar to Cursor's `Ctrl+L`: select some code and send it straight
@@ -146,6 +148,10 @@ whatever works for you. To do that, search for `addToAgentContext` in
 `keybindings.json` with the command prefixed by `-`. See
 [How the last agent is detected and known limitations](#how-the-last-agent-is-detected-and-known-limitations)
 for an example of custom keybindings.
+
+## Demo
+
+https://github.com/user-attachments/assets/239e6b06-a1f4-4708-ada0-205dfe9552ba
 
 ## How selections are modelled
 
