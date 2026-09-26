@@ -60,6 +60,28 @@
         "category": "Add to Agent Context"
       }
     ],
+    "keybindings": [
+      {
+        "key": "ctrl+'",
+        "command": "addToAgentContext.sendToAgent",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "ctrl+shift+'",
+        "command": "addToAgentContext.pickAction",
+        "when": "editorTextFocus"
+      },
+      {
+        "key": "ctrl+'",
+        "command": "copyFilePath",
+        "when": "filesExplorerFocus && !inputFocus"
+      },
+      {
+        "key": "ctrl+shift+'",
+        "command": "addToAgentContext.pickFileAction",
+        "when": "filesExplorerFocus && !inputFocus"
+      }
+    ],
     "configuration": {
       "title": "Add to Agent Context",
       "properties": {

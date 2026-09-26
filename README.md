@@ -66,12 +66,48 @@ You can also add the selection directly to an agent's context using `Ctrl+'`,
 similar to Cursor's `Ctrl+L`. This currently works with Claude Code and
 Codex extensions.
 
+The extension comes with these keybindings, active when an editor has focus:
+
+| Key | Command |
+|---|---|
+| `Ctrl+'` | `addToAgentContext.sendToAgent` |
+| `Ctrl+Shift+'` | `addToAgentContext.pickAction` |
+
+`Ctrl+'` sends to the last agent you sent to in this workspace. The first time,
+when there is no last agent yet, it opens the picker instead. `Ctrl+Shift+'`
+always opens the picker, and whichever agent you pick there becomes the target
+of `Ctrl+'` from then on. It doesn't matter where the agent's panel is (primary
+sidebar, secondary sidebar, bottom panel or an editor tab), since the agent's
+own command opens and focuses it.
+
+To always send to one agent regardless of the last one used, pass its id as
+`args`:
+
 ```json
 {
-    "key": "ctrl+'",
+    "key": "ctrl+alt+'",
     "command": "addToAgentContext.sendToAgent",
+    "args": "codex",
     "when": "editorTextFocus"
-},
+}
+```
+
+**Known limitation:** the target is the last agent the extension sent to, not
+the agent panel you last opened or used. If you open another agent's panel and
+work in it manually, `Ctrl+'` still sends to the previous agent until you pick
+the new one with `Ctrl+Shift+'`. VS Code doesn't let extensions see which views
+are open or focused, so there is no reliable way to follow the visible panel.
+
+#### Workaround: agents kept in the secondary sidebar
+
+If you always keep your agents in the secondary sidebar, you can add these
+keybindings to your `keybindings.json`. `Ctrl+'` then sends to whichever agent
+is showing in the secondary sidebar, and opens the picker when the secondary
+sidebar is hidden. This relies on the secondary sidebar's context keys, so it
+doesn't work for agents moved to the primary sidebar, the bottom panel or an
+editor tab.
+
+```json
 {
     "key": "ctrl+'",
     "command": "addToAgentContext.pickAction",
@@ -88,13 +124,13 @@ Codex extensions.
     "command": "addToAgentContext.sendToAgent",
     "args": "codex",
     "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
-},
-{
-    "key": "ctrl+shift+'",
-    "command": "addToAgentContext.pickAction",
-    "when": "editorTextFocus"
 }
 ```
+
+Your own keybindings take priority over the ones the extension comes with. If
+the secondary sidebar is showing something other than an agent, none of these
+match and `Ctrl+'` falls back to the default: sending to the last agent you sent
+to.
 
 ### Adding files and folders from the explorer
 
@@ -102,13 +138,18 @@ Select one or more items in the explorer and press `Ctrl+Shift+'` to either copy
 their paths to the clipboard (one per line) or pick an agent to add them to.
 Only agents with a `fileCommand` are offered, which currently means Codex.
 
-```json
-{
-    "key": "ctrl+shift+'",
-    "command": "addToAgentContext.pickFileAction",
-    "when": "filesExplorerFocus && !inputFocus"
-}
-```
+The extension comes with these keybindings, active when the explorer has focus
+and you aren't renaming a file:
+
+| Key | Command |
+|---|---|
+| `Ctrl+'` | `copyFilePath` (built-in) |
+| `Ctrl+Shift+'` | `addToAgentContext.pickFileAction` |
+
+In the explorer, plain `Ctrl+'` copies the selected paths with VS Code's
+built-in **Copy Path** rather than sending them to the last agent, because
+Claude Code has no way to receive them (see the limitation below). You can then
+paste the paths into any agent's input.
 
 A command run from a keybinding doesn't receive the explorer selection, so the
 extension runs the built-in **Copy Path** to read it and then restores your
@@ -122,10 +163,25 @@ it has no command that accepts a file path or URI (checked with Claude Code
 Code, open it and use `Ctrl+'` with nothing selected, which mentions the whole
 file.
 
+### Changing the default keybindings
+
+To rebind or remove any of the keybindings the extension comes with, search
+for `addToAgentContext` (or `copyFilePath`) in **Preferences: Open Keyboard
+Shortcuts**, or add an entry with the command prefixed by `-` to your
+`keybindings.json`:
+
+```json
+{
+    "key": "ctrl+'",
+    "command": "-addToAgentContext.sendToAgent",
+    "when": "editorTextFocus"
+}
+```
+
 ### Configuring agents
 
 Agents are configured in `settings.json` under `addToAgentContext.agents`,
-keyed by agent id (the id you pass as `args` in the keybindings above). Your
+keyed by agent id (the id you can pass as `args` to `sendToAgent`). Your
 entries are merged with the built-in `claude` and `codex` ones, so you only
 write what you want to change:
 
