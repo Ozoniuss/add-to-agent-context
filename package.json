@@ -36,8 +36,8 @@
     "watch": "tsc -watch -p .",
     "test": "npm run compile && node --test out/test/",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --out add-to-agent-context.vsix",
-    "install-extension": "npm run package && code --install-extension add-to-agent-context.vsix --force"
+    "package": "vsce package",
+    "install-extension": "npm run package && code --install-extension add-to-agent-context-$npm_package_version.vsix --force"
   },
   "contributes": {
     "commands": [

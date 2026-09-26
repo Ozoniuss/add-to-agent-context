@@ -7,6 +7,19 @@ selections, including multiple ones, are turned into line ranges.
 
 See [Demo](#demo) for a demo video.
 
+## Installation
+
+1. Download the `.vsix` file from the latest
+   [release](https://github.com/Ozoniuss/add-to-agent-context/releases/latest).
+2. Install it from the command line:
+
+   ```bash
+   code --install-extension add-to-agent-context-<version>.vsix
+   ```
+
+   Or in VS Code, open the Command Palette (`Ctrl+Shift+P`), run
+   **Extensions: Install from VSIX...** and pick the downloaded file.
+
 ## Usage
 
 The idea is similar to Cursor's `Ctrl+L`: select some code and send it straight

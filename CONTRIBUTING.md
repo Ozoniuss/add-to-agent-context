@@ -11,9 +11,13 @@ npm test
 npm run install-extension
 ```
 
-`npm run install-extension` packages `add-to-agent-context.vsix` and installs it
+`npm run install-extension` packages `add-to-agent-context-<version>.vsix` and installs it
 into VS Code. Reload the window afterward. There's no integration tests so this
 is how I actually test the extension works as expected.
+
+## Releasing
+
+Releases are handled by the maintainer.
 
 ## Making a pull request
 
