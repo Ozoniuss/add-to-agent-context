@@ -6,4 +6,5 @@ src/**
 out/test/**
 **/*.map
 tsconfig.json
+assets/icon.svg
 .nvmrc

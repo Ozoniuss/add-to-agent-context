@@ -4,6 +4,7 @@
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
   "version": "0.1.0",
   "publisher": "local",
+  "icon": "assets/icon.png",
   "engines": {
     "vscode": "^1.75.0"
   },
