@@ -1,7 +1,9 @@
 # Agent instructions
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the extension locally and
-how to submit changes.
+how to submit changes. If the user says they are the maintainer, skip the pull
+request steps and work and commit directly on `main` instead. Everything else
+in this file still applies.
 
 ## Code style
 
@@ -12,7 +14,10 @@ developer and finds iterative code easier to read.
 ## Documenting changes
 
 - Update [README.md](README.md) with instructions on how a new feature works.
-- Update [CHANGELOG.md](CHANGELOG.md) with what has changed.
+- Update [CHANGELOG.md](CHANGELOG.md) with what has changed. Add your entries
+  under an `## Unreleased` heading at the top of the file, and create that
+  heading if it doesn't exist. Don't add a version number. That happens when
+  the next release is made.
 - Update the `contributes` section of [package.json](package.json) when adding,
   renaming or changing commands, keybindings or settings, so the extension
   manifest matches the code.
@@ -25,6 +30,27 @@ developer and finds iterative code easier to read.
   and Linux and `mac` for macOS. The README shows them as they would appear in
   a user's `keybindings.json`, which has no `mac` field, so it has one block
   with the `key` values and a separate macOS block with the `mac` values.
+
+## Releasing
+
+Only the maintainer makes releases. When asked to make one:
+
+1. Pick the new version from the `## Unreleased` entries, following semantic
+   versioning. Use a patch bump for bug fixes only, a minor bump for new
+   features, commands or settings, and a major bump for changes that break
+   existing setups, such as removing or renaming a command or setting. If it's
+   unclear, ask.
+2. Run `npm version <version> --no-git-tag-version` to bump the version in
+   `package.json` and `package-lock.json`.
+3. Rename `## Unreleased` in [CHANGELOG.md](CHANGELOG.md) to `## <version>`.
+   The release workflow takes the release notes from this heading and fails if
+   it's missing.
+4. Commit these changes on `main`.
+5. Tag that commit `v<version>`, e.g. `git tag v1.3.0`. The release workflow
+   checks that the tag matches the version in `package.json`.
+
+Don't push unless asked. Pushing the tag triggers the release workflow, which
+publishes a GitHub release.
 
 ## AI contributions
 
