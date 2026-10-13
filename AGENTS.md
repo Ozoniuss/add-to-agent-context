@@ -11,6 +11,11 @@ Avoid functional-style JavaScript such as `filter`/`map`/`reduce` chains. Prefer
 iterative code with plain `for` loops and `if`/`else`. The maintainer is a Go
 developer and finds iterative code easier to read.
 
+Name the variable holding a `registerCommand` result after the command ID
+without the `addToAgentContext.` prefix, e.g. `const pickAction = ...` for
+`addToAgentContext.pickAction`. If the handler is a named function, add
+`Handler`, e.g. `pickActionHandler`.
+
 ## Documenting changes
 
 - Update [README.md](README.md) with instructions on how a new feature works.

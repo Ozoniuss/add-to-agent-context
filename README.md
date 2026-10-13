@@ -66,6 +66,14 @@ In the explorer, with one or more files or folders selected:
   `Ctrl+Shift+'` (`Cmd+Shift+'` on macOS) and pick from the list.
   (`addToAgentContext.pickFileAction`)
 
+If you just want to focus on the chat of the agent you last sent to, run
+**Add to Agent Context: Open Last Agent Chat in Sidebar**
+(`addToAgentContext.openLastChatInSidebar`). If you haven't sent to an agent
+yet, it asks which one to open. To choose the agent instead, run **Add to Agent
+Context: Open Agent Chat in Sidebar** (`addToAgentContext.openChatInSidebar`).
+
+> The commands above only work when the agent extensions are opened in the sidebar.
+
 > Note that in the explorer, currently `Ctrl+'` only copies the paths instead of
 sending them to the last agent like it does in an editor. That's because not all
 agents have a command that accepts a file URI. In particular, Claude Code can
@@ -74,7 +82,8 @@ folders from the explorer. I opened
 [anthropics/claude-code#97535](https://github.com/anthropics/claude-code/issues/97535)
 asking for a command that adds a file or folder to the chat, like Codex's
 `chatgpt.addFileToThread`. The behavior will change once I find a reliable way
-to send to last agent.
+to send to last agent. In the meantime, you can copy the paths with `Ctrl+'`,
+run **Open Last Agent Chat in Sidebar** and paste them.
 
 ### How the last agent is detected and known limitations
 
@@ -111,10 +120,10 @@ this (you could use `cmd+'` instead of `ctrl+'` on macOS):
 
 ### Default agents
 
-| Id | Agent | Editor selection | Explorer files and folders |
-|---|---|---|---|
-| `claude` | Claude Code | yes | no |
-| `codex` | Codex | yes | yes |
+| Id | Agent | Editor selection | Explorer files and folders | Open chat |
+|---|---|---|---|---|
+| `claude` | Claude Code | yes | no | yes |
+| `codex` | Codex | yes | yes | yes |
 
 An agent is still listed in the picker when its extension isn't installed, but
 it is marked as unavailable.
@@ -130,7 +139,8 @@ Agents are configured in `settings.json` under `addToAgentContext.agents`:
         "label": "My Agent",
         "extensionId": "someone.my-agent",
         "command": "myAgent.addSelection",
-        "fileCommand": "myAgent.addFile"
+        "fileCommand": "myAgent.addFile",
+        "openChatInSidebarCommand": "myAgent.openSidebar"
     },
     // change one field of a built-in agent, leaving the other ones set to default
     "claude": { "label": "Claude" },
@@ -144,6 +154,7 @@ Agents are configured in `settings.json` under `addToAgentContext.agents`:
 | `command` | yes | Command that adds the current editor selection to the agent's context |
 | `label` | no | Name shown in the picker; defaults to the agent id |
 | `fileCommand` | no | Command that adds a file or folder, called with its URI; enables the agent in the explorer picker |
+| `openChatInSidebarCommand` | no | Command that opens the agent's chat in the sidebar and focuses it; used by Open Last Agent Chat in Sidebar and Open Agent Chat in Sidebar |
 | `extensionId` | no | Extension providing the agent, only used to report that it isn't installed |
 
 The `command` is invoked once per selected line range, with that range as the
@@ -211,6 +222,19 @@ whatever works for you. To do that, search for `addToAgentContext` in
 `keybindings.json` with the command prefixed by `-`. See
 [How the last agent is detected and known limitations](#how-the-last-agent-is-detected-and-known-limitations)
 for an example of custom keybindings.
+
+### Suggested additional keybindings
+
+```json
+{
+    "key": "ctrl+i",
+    "command": "addToAgentContext.openLastChatInSidebar"
+},
+{
+    "key": "ctrl+shift+i",
+    "command": "addToAgentContext.openChatInSidebar"
+}
+```
 
 ## Demo
 

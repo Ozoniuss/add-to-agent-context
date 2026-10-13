@@ -8,6 +8,7 @@ interface AgentSetting {
   label?: string;
   command?: string;
   fileCommand?: string;
+  openChatInSidebarCommand?: string;
   extensionId?: string;
 }
 
@@ -24,6 +25,8 @@ interface AgentConfig {
    * item with its `vscode.Uri` as the only argument.
    */
   fileCommand?: string;
+  /** Command that opens the agent's chat in the sidebar and focuses it. */
+  openChatInSidebarCommand?: string;
   /**
    * Publisher-qualified id of the extension providing the agent, e.g.
    * `anthropic.claude-code`. Used to report a missing extension; when omitted,
@@ -38,6 +41,8 @@ interface Agent extends AgentConfig {
   available: boolean;
   /** `installed` and `fileCommand` is set and registered. */
   fileAvailable: boolean;
+  /** `installed` and `openChatInSidebarCommand` is set and registered. */
+  openChatInSidebarAvailable: boolean;
   /** The extension named by `extensionId` is present, or none was given. */
   installed: boolean;
 }
@@ -69,6 +74,7 @@ function configuredAgents(): AgentConfig[] {
       label,
       command: agent.command,
       fileCommand: agent.fileCommand,
+      openChatInSidebarCommand: agent.openChatInSidebarCommand,
       extensionId: agent.extensionId,
     });
   }
@@ -89,12 +95,16 @@ async function availableAgents(): Promise<Agent[]> {
     if (installed && agent.fileCommand) {
       fileAvailable = registered.has(agent.fileCommand);
     }
-    result.push({ ...agent, installed, available, fileAvailable });
+    let openChatInSidebarAvailable = false;
+    if (installed && agent.openChatInSidebarCommand) {
+      openChatInSidebarAvailable = registered.has(agent.openChatInSidebarCommand);
+    }
+    result.push({ ...agent, installed, available, fileAvailable, openChatInSidebarAvailable });
   }
   return result;
 }
 
-async function sendToAgent(agent: Agent, editor: vscode.TextEditor): Promise<void> {
+async function sendSelectionToAgent(agent: Agent, editor: vscode.TextEditor): Promise<void> {
   const merged = mergedRanges(editor);
 
   if (merged.length === 0) {
@@ -134,8 +144,72 @@ async function runAgentById(editor: vscode.TextEditor, agentId: string): Promise
     return false;
   }
 
-  await sendToAgent(agent, editor);
+  await sendSelectionToAgent(agent, editor);
   return true;
+}
+
+async function openChatInSidebarById(agentId: string): Promise<boolean> {
+  let agent: Agent | undefined;
+  for (const candidate of await availableAgents()) {
+    if (candidate.id === agentId) {
+      agent = candidate;
+      break;
+    }
+  }
+
+  if (!agent) {
+    vscode.window.showWarningMessage(
+      `No agent registered with id "${agentId}". Check addToAgentContext.agents.`
+    );
+    return false;
+  }
+  if (!agent.openChatInSidebarCommand) {
+    vscode.window.showWarningMessage(
+      `Cannot open ${agent.label}: it has no openChatInSidebarCommand. Check addToAgentContext.agents.`
+    );
+    return false;
+  }
+  if (!agent.openChatInSidebarAvailable) {
+    let reason = `command "${agent.openChatInSidebarCommand}" is not registered`;
+    if (!agent.installed) {
+      reason = `extension "${agent.extensionId}" is not installed`;
+    }
+    vscode.window.showWarningMessage(`Cannot open ${agent.label}: ${reason}.`);
+    return false;
+  }
+
+  await vscode.commands.executeCommand(agent.openChatInSidebarCommand);
+  return true;
+}
+
+async function pickChatAgent(lastAgentId: string | undefined): Promise<string | undefined> {
+  const items: (vscode.QuickPickItem & { agentId: string })[] = [];
+  for (const agent of await availableAgents()) {
+    if (!agent.openChatInSidebarAvailable) {
+      continue;
+    }
+    let description: string | undefined;
+    if (agent.id === lastAgentId) {
+      description = 'last used';
+    }
+    items.push({
+      label: `$(comment-discussion) Open ${agent.label}`,
+      description,
+      agentId: agent.id,
+    });
+  }
+
+  if (items.length === 0) {
+    vscode.window.showWarningMessage(
+      'No agent chat can be opened. Set openChatInSidebarCommand in addToAgentContext.agents.'
+    );
+    return undefined;
+  }
+
+  const choice = await vscode.window.showQuickPick(items, {
+    placeHolder: 'Open the chat of an agent',
+  });
+  return choice?.agentId;
 }
 
 
@@ -159,7 +233,7 @@ async function selectedExplorerUris(): Promise<vscode.Uri[]> {
   return uris;
 }
 
-async function pickFileAgent(): Promise<void> {
+async function pickFileActionHandler(): Promise<void> {
   const uris = await selectedExplorerUris();
   if (uris.length === 0) {
     return;
@@ -212,7 +286,7 @@ export function activate(context: vscode.ExtensionContext): void {
     await vscode.env.clipboard.writeText(formatPath(editor));
   });
 
-  const send = vscode.commands.registerCommand(
+  const sendToAgent = vscode.commands.registerCommand(
     'addToAgentContext.sendToAgent',
     async (agentId?: string) => {
       const editor = vscode.window.activeTextEditor;
@@ -230,7 +304,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
-  const pick = vscode.commands.registerCommand('addToAgentContext.pickAction', async () => {
+  const pickAction = vscode.commands.registerCommand('addToAgentContext.pickAction', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
 
@@ -286,16 +360,58 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   });
 
-  const copyFiles = vscode.commands.registerCommand('addToAgentContext.copyFilePaths', async () => {
-    await vscode.commands.executeCommand('copyFilePath');
-  });
+  const openLastChatInSidebar = vscode.commands.registerCommand(
+    'addToAgentContext.openLastChatInSidebar',
+    async () => {
+      const lastAgentId = context.workspaceState.get<string>(LAST_AGENT_KEY);
 
-  const pickFiles = vscode.commands.registerCommand(
-    'addToAgentContext.pickFileAction',
-    pickFileAgent
+      if (lastAgentId) {
+        if (await openChatInSidebarById(lastAgentId)) {
+          return;
+        }
+      }
+
+      const picked = await pickChatAgent(lastAgentId);
+      if (!picked) return;
+      if (await openChatInSidebarById(picked)) {
+        await context.workspaceState.update(LAST_AGENT_KEY, picked);
+      }
+    }
   );
 
-  context.subscriptions.push(copy, send, pick, copyFiles, pickFiles);
+  const openChatInSidebar = vscode.commands.registerCommand(
+    'addToAgentContext.openChatInSidebar',
+    async () => {
+      const lastAgentId = context.workspaceState.get<string>(LAST_AGENT_KEY);
+      const picked = await pickChatAgent(lastAgentId);
+      if (!picked) return;
+      if (await openChatInSidebarById(picked)) {
+        await context.workspaceState.update(LAST_AGENT_KEY, picked);
+      }
+    }
+  );
+
+  const copyFilePaths = vscode.commands.registerCommand(
+    'addToAgentContext.copyFilePaths',
+    async () => {
+      await vscode.commands.executeCommand('copyFilePath');
+    }
+  );
+
+  const pickFileAction = vscode.commands.registerCommand(
+    'addToAgentContext.pickFileAction',
+    pickFileActionHandler
+  );
+
+  context.subscriptions.push(
+    copy,
+    sendToAgent,
+    pickAction,
+    openLastChatInSidebar,
+    openChatInSidebar,
+    copyFilePaths,
+    pickFileAction
+  );
   registerSelectionPopup(context);
 }
 

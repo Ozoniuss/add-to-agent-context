@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- New **Open Last Agent Chat in Sidebar** command
+  (`addToAgentContext.openLastChatInSidebar`) that opens the chat of the last
+  agent you sent to, or asks which one to open. It only opens chats in the
+  sidebar and has no default keybinding.
+- New **Open Agent Chat in Sidebar** command
+  (`addToAgentContext.openChatInSidebar`) that asks which agent's chat to open.
+  It has no default keybinding.
+- New optional `openChatInSidebarCommand` agent field, set to
+  `claudeVSCodeSidebarSecondary.focus` for Claude Code and
+  `chatgpt.openSidebar` for Codex by default.
+
 ## 1.2.0
 
 - On macOS the default keybindings use `Cmd` instead of `Ctrl`.

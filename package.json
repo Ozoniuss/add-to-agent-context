@@ -59,6 +59,16 @@
         "category": "Add to Agent Context"
       },
       {
+        "command": "addToAgentContext.openLastChatInSidebar",
+        "title": "Open Last Agent Chat in Sidebar",
+        "category": "Add to Agent Context"
+      },
+      {
+        "command": "addToAgentContext.openChatInSidebar",
+        "title": "Open Agent Chat in Sidebar",
+        "category": "Add to Agent Context"
+      },
+      {
         "command": "addToAgentContext.copyFilePaths",
         "title": "Copy Explorer Selection Paths",
         "category": "Add to Agent Context"
@@ -107,18 +117,20 @@
         "addToAgentContext.agents": {
           "type": "object",
           "description": "Agents that can receive the path with line selection, keyed by agent id",
-          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent`, `addToAgentContext.pickAction` and `addToAgentContext.pickFileAction` can target, keyed by a stable agent id (used to remember the last agent you sent to, and passed as `args` to `sendToAgent`). Your entries are merged with the defaults: add a new key to add an agent, set only the fields you want to change on an existing one, or set it to `null` to remove it. Each entry needs a `command`, and is shown by its `label`, or its id when no label is set. Set `fileCommand` to also offer the agent for files and folders selected in the explorer. An agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing.",
+          "markdownDescription": "Agent extensions that `addToAgentContext.sendToAgent`, `addToAgentContext.pickAction` and `addToAgentContext.pickFileAction` can target, keyed by a stable agent id (used to remember the last agent you sent to, and passed as `args` to `sendToAgent`). Your entries are merged with the defaults: add a new key to add an agent, set only the fields you want to change on an existing one, or set it to `null` to remove it. Each entry needs a `command`, and is shown by its `label`, or its id when no label is set. Set `fileCommand` to also offer the agent for files and folders selected in the explorer, and `openChatInSidebarCommand` to let `addToAgentContext.openLastChatInSidebar` and `addToAgentContext.openChatInSidebar` open its chat. An agent whose extension is missing, or whose command is no longer registered, is reported as unavailable instead of silently doing nothing.",
           "default": {
             "claude": {
               "label": "Claude Code",
               "extensionId": "anthropic.claude-code",
-              "command": "claude-vscode.insertAtMention"
+              "command": "claude-vscode.insertAtMention",
+              "openChatInSidebarCommand": "claudeVSCodeSidebarSecondary.focus"
             },
             "codex": {
               "label": "Codex",
               "extensionId": "openai.chatgpt",
               "command": "chatgpt.addToThread",
-              "fileCommand": "chatgpt.addFileToThread"
+              "fileCommand": "chatgpt.addFileToThread",
+              "openChatInSidebarCommand": "chatgpt.openSidebar"
             }
           },
           "additionalProperties": {
@@ -143,6 +155,11 @@
                 "type": "string",
                 "description": "Command that adds a file or folder to the agent's context, called with its URI",
                 "markdownDescription": "Command that adds a file or folder to the agent's context. Called once per item selected in the explorer, with that item's URI as the only argument. Agents without it are not offered by `addToAgentContext.pickFileAction`."
+              },
+              "openChatInSidebarCommand": {
+                "type": "string",
+                "description": "Command that opens the agent's chat in the sidebar and focuses it",
+                "markdownDescription": "Command that opens the agent's chat in the sidebar and focuses it. Used by `addToAgentContext.openLastChatInSidebar` and `addToAgentContext.openChatInSidebar`; agents without it can't be opened."
               }
             }
           }
