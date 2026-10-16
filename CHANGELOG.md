@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.3.0
 
 - New **Open Last Agent Chat in Sidebar** command
   (`addToAgentContext.openLastChatInSidebar`) that opens the chat of the last
