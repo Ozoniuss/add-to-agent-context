@@ -4,11 +4,14 @@
 
 - New **Open Last Agent Chat in Sidebar** command
   (`addToAgentContext.openLastChatInSidebar`) that opens the chat of the last
-  agent you sent to, or asks which one to open. It only opens chats in the
-  sidebar and has no default keybinding.
+  agent you sent to, or asks which one to open. Like `sendToAgent`, it accepts
+  an agent id as `args` to open that agent's chat instead. For the default
+  agents it opens the chat in the sidebar. It has no default keybinding.
 - New **Open Agent Chat in Sidebar** command
   (`addToAgentContext.openChatInSidebar`) that asks which agent's chat to open.
   It has no default keybinding.
+- Opening an agent's chat with either command makes it the last agent, so
+  `sendToAgent` sends to it next.
 - New optional `openChatInSidebarCommand` agent field, set to
   `claudeVSCodeSidebarSecondary.focus` for Claude Code and
   `chatgpt.openSidebar` for Codex by default.

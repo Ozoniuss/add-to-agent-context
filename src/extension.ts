@@ -362,11 +362,13 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const openLastChatInSidebar = vscode.commands.registerCommand(
     'addToAgentContext.openLastChatInSidebar',
-    async () => {
+    async (agentId?: string) => {
       const lastAgentId = context.workspaceState.get<string>(LAST_AGENT_KEY);
+      const target = agentId ?? lastAgentId;
 
-      if (lastAgentId) {
-        if (await openChatInSidebarById(lastAgentId)) {
+      if (target) {
+        if (await openChatInSidebarById(target)) {
+          await context.workspaceState.update(LAST_AGENT_KEY, target);
           return;
         }
       }

@@ -71,8 +71,12 @@ If you just want to focus on the chat of the agent you last sent to, run
 (`addToAgentContext.openLastChatInSidebar`). If you haven't sent to an agent
 yet, it asks which one to open. To choose the agent instead, run **Add to Agent
 Context: Open Agent Chat in Sidebar** (`addToAgentContext.openChatInSidebar`).
+Like `sendToAgent`, `openLastChatInSidebar` also accepts an agent id as `args`
+in a keybinding to open that agent's chat directly. This is useful for example
+when you're browsing files while the agent works and need to answer its
+questions.
 
-> The commands above only work when the agent extensions are opened in the sidebar.
+> The commands above were only tested when agents are opened in the sidebar.
 
 > Note that in the explorer, currently `Ctrl+'` only copies the paths instead of
 sending them to the last agent like it does in an editor. That's because not all
@@ -96,26 +100,33 @@ one).
 
 There are ways to work around this. For example, if you always keep your agents
 in the secondary side bar you can overwrite the keybindings to something like
-this (you could use `cmd+'` instead of `ctrl+'` on macOS):
+this, which is what I use (you could use `cmd+'` instead of `ctrl+'` on macOS):
 
 ```json
-{
-    "key": "ctrl+'",
-    "command": "addToAgentContext.pickAction",
-    "when": "editorTextFocus && !auxiliaryBarVisible"
-},
-{
-    "key": "ctrl+'",
-    "command": "addToAgentContext.sendToAgent",
-    "args": "claude",
-    "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
-},
-{
-    "key": "ctrl+'",
-    "command": "addToAgentContext.sendToAgent",
-    "args": "codex",
-    "when": "editorTextFocus && auxiliaryBarVisible && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
-}
+    {
+        "key": "ctrl+'",
+        "command": "addToAgentContext.sendToAgent",
+        "args": "claude",
+        "when": "editorTextFocus && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
+    },
+    {
+        "key": "ctrl+'",
+        "command": "addToAgentContext.sendToAgent",
+        "args": "codex",
+        "when": "editorTextFocus && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "addToAgentContext.openLastChatInSidebar",
+        "args": "claude",
+        "when": "activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "addToAgentContext.openLastChatInSidebar",
+        "args": "codex",
+        "when": "activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
+    },
 ```
 
 ### Default agents
@@ -283,6 +294,22 @@ For example:
 There are various ways to create selections, especially with keyboard shortcuts.
 For a simple way to test how this works, you can make multiple selections by
 holding `alt` and making selections with the mouse.
+
+## Troubleshooting and known issues
+
+### Code context isn't sent to Claude Code or Codex (applies to secondary side bar)
+
+There may be a bug with how the widget is dispalyed on the sidebar. Try
+resetting the location of the agent's chat.
+
+![Reset Location in the agent tab's context menu](assets/reset-location.png)
+
+### Code context isn't sent to Codex extension
+
+The command "Codex: Add to Codex Thread" does not seem to work for some files
+(e.g. VS Code's keybindings.json file). It's not clear yet for which kind of
+files it doesn't work. If you can't send snippets to Codex, also check if the
+problem is with the extension's native command.
 
 ## Contributing
 

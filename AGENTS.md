@@ -5,6 +5,9 @@ how to submit changes. If the user says they are the maintainer, skip the pull
 request steps and work and commit directly on `main` instead. Everything else
 in this file still applies.
 
+Run `nvm use` before running any `npm` command, so the Node version from
+[.nvmrc](.nvmrc) is used.
+
 ## Code style
 
 Avoid functional-style JavaScript such as `filter`/`map`/`reduce` chains. Prefer
