@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { mergedRanges, formatPath } from './ranges';
 
 const LAST_AGENT_KEY = 'addToAgentContext.lastAgentId';
+const PASTE_DELAY_MS = 100;
 
 /** An entry as written in the `addToAgentContext.agents` setting. */
 interface AgentSetting {
@@ -9,6 +10,7 @@ interface AgentSetting {
   command?: string;
   fileCommand?: string;
   openChatInSidebarCommand?: string;
+  pasteExplorerPathsDirectly?: boolean;
   extensionId?: string;
 }
 
@@ -27,6 +29,11 @@ interface AgentConfig {
   fileCommand?: string;
   /** Command that opens the agent's chat in the sidebar and focuses it. */
   openChatInSidebarCommand?: string;
+  /**
+   * Paste the paths of files and folders selected in the explorer into the
+   * agent's chat instead of calling `fileCommand`.
+   */
+  pasteExplorerPathsDirectly: boolean;
   /**
    * Publisher-qualified id of the extension providing the agent, e.g.
    * `anthropic.claude-code`. Used to report a missing extension; when omitted,
@@ -55,6 +62,12 @@ interface ActionItem extends vscode.QuickPickItem {
   available?: boolean;
 }
 
+/** An entry in the `pickFileAction` quick pick. */
+interface FileActionItem extends vscode.QuickPickItem {
+  /** Agent to send to, or `null` for the "Copy to clipboard" entry. */
+  agent: Agent | null;
+}
+
 function configuredAgents(): AgentConfig[] {
   const agents = vscode.workspace
     .getConfiguration('addToAgentContext')
@@ -75,6 +88,7 @@ function configuredAgents(): AgentConfig[] {
       command: agent.command,
       fileCommand: agent.fileCommand,
       openChatInSidebarCommand: agent.openChatInSidebarCommand,
+      pasteExplorerPathsDirectly: agent.pasteExplorerPathsDirectly === true,
       extensionId: agent.extensionId,
     });
   }
@@ -233,7 +247,64 @@ async function selectedExplorerUris(): Promise<vscode.Uri[]> {
   return uris;
 }
 
-async function pickFileActionHandler(): Promise<void> {
+async function pastePathsIntoChat(openChatCommand: string, paths: string[]): Promise<void> {
+  await vscode.env.clipboard.writeText(paths.join(' ') + ' ');
+  await vscode.commands.executeCommand(openChatCommand);
+  // hack: try to make sure you're focused by the time you paste
+  await new Promise((resolve) => setTimeout(resolve, PASTE_DELAY_MS));
+  await vscode.commands.executeCommand('editor.action.clipboardPasteAction');
+}
+
+function acceptsExplorerItems(agent: Agent): boolean {
+  if (agent.pasteExplorerPathsDirectly) {
+    return agent.openChatInSidebarAvailable;
+  }
+  return agent.fileAvailable;
+}
+
+async function sendUrisToAgent(agent: Agent, uris: vscode.Uri[]): Promise<void> {
+  if (agent.pasteExplorerPathsDirectly) {
+    if (!agent.openChatInSidebarCommand) {
+      return;
+    }
+    const paths: string[] = [];
+    for (const uri of uris) {
+      paths.push(uri.fsPath);
+    }
+    await pastePathsIntoChat(agent.openChatInSidebarCommand, paths);
+    return;
+  }
+  if (!agent.fileCommand) {
+    return;
+  }
+  for (const uri of uris) {
+    await vscode.commands.executeCommand(agent.fileCommand, uri);
+  }
+}
+
+async function sendFilesToAgentHandler(
+  context: vscode.ExtensionContext,
+  agentId?: string
+): Promise<void> {
+  const target = agentId ?? context.workspaceState.get<string>(LAST_AGENT_KEY);
+  if (target) {
+    for (const agent of await availableAgents()) {
+      if (agent.id !== target || !acceptsExplorerItems(agent)) {
+        continue;
+      }
+      const uris = await selectedExplorerUris();
+      if (uris.length === 0) {
+        return;
+      }
+      await sendUrisToAgent(agent, uris);
+      await context.workspaceState.update(LAST_AGENT_KEY, agent.id);
+      return;
+    }
+  }
+  await vscode.commands.executeCommand('addToAgentContext.pickFileAction');
+}
+
+async function pickFileActionHandler(context: vscode.ExtensionContext): Promise<void> {
   const uris = await selectedExplorerUris();
   if (uris.length === 0) {
     return;
@@ -244,20 +315,20 @@ async function pickFileActionHandler(): Promise<void> {
     paths.push(uri.fsPath);
   }
 
-  const items: (vscode.QuickPickItem & { fileCommand: string | null })[] = [
+  const items: FileActionItem[] = [
     {
       label: '$(clippy) Copy to clipboard',
       description: paths.join(', '),
-      fileCommand: null,
+      agent: null,
     },
   ];
   for (const agent of await availableAgents()) {
-    if (!agent.fileAvailable || !agent.fileCommand) {
+    if (!acceptsExplorerItems(agent)) {
       continue;
     }
     items.push({
       label: `$(comment-discussion) Send to ${agent.label}`,
-      fileCommand: agent.fileCommand,
+      agent,
     });
   }
 
@@ -270,13 +341,12 @@ async function pickFileActionHandler(): Promise<void> {
     return;
   }
 
-  if (choice.fileCommand === null) {
+  if (choice.agent === null) {
     await vscode.env.clipboard.writeText(paths.join('\n'));
     return;
   }
-  for (const uri of uris) {
-    await vscode.commands.executeCommand(choice.fileCommand, uri);
-  }
+  await sendUrisToAgent(choice.agent, uris);
+  await context.workspaceState.update(LAST_AGENT_KEY, choice.agent.id);
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -400,9 +470,14 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  const sendFilesToAgent = vscode.commands.registerCommand(
+    'addToAgentContext.sendFilesToAgent',
+    (agentId?: string) => sendFilesToAgentHandler(context, agentId)
+  );
+
   const pickFileAction = vscode.commands.registerCommand(
     'addToAgentContext.pickFileAction',
-    pickFileActionHandler
+    () => pickFileActionHandler(context)
   );
 
   context.subscriptions.push(
@@ -412,6 +487,7 @@ export function activate(context: vscode.ExtensionContext): void {
     openLastChatInSidebar,
     openChatInSidebar,
     copyFilePaths,
+    sendFilesToAgent,
     pickFileAction
   );
   registerSelectionPopup(context);

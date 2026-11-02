@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+- New experimental `pasteExplorerPathsDirectly` agent field, off by default.
+  When it's on for an agent with an `openChatInSidebarCommand`, **Add Explorer
+  Selection to Agent** (`addToAgentContext.pickFileAction`) offers that agent
+  even without a `fileCommand`, which makes it usable with Claude Code. Instead
+  of calling the agent's `fileCommand`, it copies the selected paths to the
+  clipboard, opens the agent's chat and pastes them into its input. The paths
+  stay on the clipboard.
+- New **Add Explorer Selection to Last Agent** command
+  (`addToAgentContext.sendFilesToAgent`) that sends the files and folders
+  selected in the explorer to the last agent, like `sendToAgent` does for the
+  editor selection. If there is no last agent, or it can't receive files and
+  folders, it opens **Add Explorer Selection to Agent** instead. Like
+  `sendToAgent`, it accepts an agent id as `args`.
+- `Ctrl+'` (`Cmd+'` on macOS) in the explorer now runs
+  `addToAgentContext.sendFilesToAgent` instead of copying the selected paths.
+  `addToAgentContext.copyFilePaths` no longer has a default keybinding.
+- Picking an agent in **Add Explorer Selection to Agent** makes it the last
+  agent.
+
 ## 1.3.0
 
 - New **Open Last Agent Chat in Sidebar** command

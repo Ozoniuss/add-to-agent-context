@@ -7,6 +7,9 @@ selections, including multiple ones, are turned into line ranges.
 
 See [Demo](#demo) for a demo video.
 
+If you compile the extension directly from main, check out [CHANGELOG.md](./CHANGELOG.md)
+for unreleased changes. Those are not documented in the README.
+
 ## Installation
 
 The extension is published on the

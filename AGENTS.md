@@ -21,7 +21,11 @@ without the `addToAgentContext.` prefix, e.g. `const pickAction = ...` for
 
 ## Documenting changes
 
-- Update [README.md](README.md) with instructions on how a new feature works.
+Unreleased changes aren't documented in [README.md](README.md). The README
+describes the latest release, and its introduction points people who build from
+`main` to the changelog instead. Don't change the README when adding or
+changing a feature.
+
 - Update [CHANGELOG.md](CHANGELOG.md) with what has changed. Add your entries
   under an `## Unreleased` heading at the top of the file, and create that
   heading if it doesn't exist. Don't add a version number. That happens when
@@ -29,6 +33,19 @@ without the `addToAgentContext.` prefix, e.g. `const pickAction = ...` for
 - Update the `contributes` section of [package.json](package.json) when adding,
   renaming or changing commands, keybindings or settings, so the extension
   manifest matches the code.
+- Describe each setting and agent field only by what it does. When a new option
+  changes how other fields behave, explain that in the new option's own
+  description and leave the other fields' descriptions alone. This matters even
+  more for experimental options, which may be removed. For example, this is how
+  not to describe `fileCommand` after adding the experimental
+  `pasteExplorerPathsDirectly` field:
+
+  > Command that adds a file or folder to the agent's context. Called once per
+  > item selected in the explorer, with that item's URI as the only argument.
+  > Agents without it are not offered by `addToAgentContext.pickFileAction`,
+  > unless `pasteExplorerPathsDirectly` is on.
+
+  The last clause belongs in the description of `pasteExplorerPathsDirectly`.
 - Keep the agent fields documented in the README's "Customizing agents" section
   in sync with the `addToAgentContext.agents` schema in `package.json`. The same
   goes for the "Default agents" table and the setting's `default` value.
