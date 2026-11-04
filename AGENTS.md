@@ -15,9 +15,9 @@ iterative code with plain `for` loops and `if`/`else`. The maintainer is a Go
 developer and finds iterative code easier to read.
 
 Name the variable holding a `registerCommand` result after the command ID
-without the `addToAgentContext.` prefix, e.g. `const pickAction = ...` for
-`addToAgentContext.pickAction`. If the handler is a named function, add
-`Handler`, e.g. `pickActionHandler`.
+without the `addToAgentContext.` prefix, e.g. `const sendSelectionToAgent = ...`
+for `addToAgentContext.sendSelectionToAgent`. If the handler is a named
+function, add `Handler`, e.g. `sendSelectionToAgentHandler`.
 
 ## Documenting changes
 
@@ -42,8 +42,9 @@ changing a feature.
 
   > Command that adds a file or folder to the agent's context. Called once per
   > item selected in the explorer, with that item's URI as the only argument.
-  > Agents without it are not offered by `addToAgentContext.pickFileAction`,
-  > unless `pasteExplorerPathsDirectly` is on.
+  > Agents without it are not offered by
+  > `addToAgentContext.sendExplorerSelectionToAgent`, unless
+  > `pasteExplorerPathsDirectly` is on.
 
   The last clause belongs in the description of `pasteExplorerPathsDirectly`.
 - Keep the agent fields documented in the README's "Customizing agents" section

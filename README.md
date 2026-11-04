@@ -2,8 +2,9 @@
 
 A VS Code extension that sends the selected content directly to agent
 extensions, or simply copies a reference to that selection to the clipboard.
-See [How selections are modelled](#how-selections-are-modelled) for how
-selections, including multiple ones, are turned into line ranges.
+See [How selections are modelled](#how-selections-are-modelled) for more details
+about what gets sent or copied when you have selections in an open editor or the
+file explorer.
 
 See [Demo](#demo) for a demo video.
 
@@ -45,61 +46,69 @@ terminal.
 In an editor:
 
 - To send the selection to the agent you last sent to, press `Ctrl+'`
-  (`Cmd+'` on macOS). The first time, it opens the picker instead.
-  (`addToAgentContext.sendToAgent`)
+  (`Cmd+'` on macOS). If there is no last agent yet, it opens the picker 
+  instead. (`addToAgentContext.sendSelectionToLastAgent`)
 - To choose which agent to send the selection to, or to copy a `path:lines`
   reference to the clipboard, press `Ctrl+Shift+'`
   (`Cmd+Shift+'` on macOS) and pick from the list.
-  (`addToAgentContext.pickAction`)
+  (`addToAgentContext.sendSelectionToAgent`)
 - To do either with the mouse, select text by dragging. A popup appears next to
   the cursor with an **Add to _agent_** button for each available agent, in the
   order they appear in `addToAgentContext.agents`, and a **Copy to clipboard**
   button.
 
 With nothing selected in the editor, the whole file is sent or copied. See
-[How selections are modelled](#how-selections-are-modelled) for what gets sent
-when you select part of a line, several ranges, and so on.
+[Selections in the open editor](#selections-in-the-open-editor) for what gets
+sent when you select part of a line, several ranges, and so on.
 
 In the explorer, with one or more files or folders selected:
 
-- To copy their paths to the clipboard, one per line, press `Ctrl+'`
-  (`Cmd+'` on macOS). (`addToAgentContext.copyFilePaths`, which runs VS Code's built-in
-  `copyFilePath`)
-- To copy the paths or add the files to an agent that supports it, press
-  `Ctrl+Shift+'` (`Cmd+Shift+'` on macOS) and pick from the list.
-  (`addToAgentContext.pickFileAction`)
+- To send them to the agent you last sent to, press `Ctrl+'` (`Cmd+'` on
+  macOS). If there is no last agent yet, or it can't receive files and folders,
+  it opens the picker instead.
+  (`addToAgentContext.sendExplorerSelectionToLastAgent`)
+- To choose which agent to send them to, or to copy their paths to the
+  clipboard, press `Ctrl+Shift+'` (`Cmd+Shift+'` on macOS) and pick from the
+  list. Only agents that can receive files and folders are listed.
+  (`addToAgentContext.sendExplorerSelectionToAgent`)
+
+See [Selections in the file explorer](#selections-in-the-file-explorer) for
+which items are used when the keyboard cursor isn't on the selected ones.
 
 If you just want to focus on the chat of the agent you last sent to, run
 **Add to Agent Context: Open Last Agent Chat in Sidebar**
 (`addToAgentContext.openLastChatInSidebar`). If you haven't sent to an agent
 yet, it asks which one to open. To choose the agent instead, run **Add to Agent
-Context: Open Agent Chat in Sidebar** (`addToAgentContext.openChatInSidebar`).
-Like `sendToAgent`, `openLastChatInSidebar` also accepts an agent id as `args`
-in a keybinding to open that agent's chat directly. This is useful for example
-when you're browsing files while the agent works and need to answer its
-questions.
+Context: Open Agent Chat in Sidebar...** (`addToAgentContext.openChatInSidebar`).
 
 > The commands above were only tested when agents are opened in the sidebar.
 
-> Note that in the explorer, currently `Ctrl+'` only copies the paths instead of
-sending them to the last agent like it does in an editor. That's because not all
-agents have a command that accepts a file URI. In particular, Claude Code can
-only mention the file open in the active editor, so it can't be sent files or
-folders from the explorer. I opened
+Note that not all agents have a command that accepts a file URI. In
+particular, Claude Code can only mention the file open in the active editor, so
+by default it can't be sent files or folders from the explorer. I opened
 [anthropics/claude-code#97535](https://github.com/anthropics/claude-code/issues/97535)
 asking for a command that adds a file or folder to the chat, like Codex's
-`chatgpt.addFileToThread`. The behavior will change once I find a reliable way
-to send to last agent. In the meantime, you can copy the paths with `Ctrl+'`,
-run **Open Last Agent Chat in Sidebar** and paste them.
+`chatgpt.addFileToThread`. In the meantime, there is an experimental workaround,
+off by default: set `pasteExplorerPathsDirectly` on the agent, and the extension
+pastes the paths into the agent's chat instead. For Claude Code, add this to
+`settings.json`:
+
+```json
+"addToAgentContext.agents": {
+    "claude": { "pasteExplorerPathsDirectly": true }
+}
+```
 
 ### How the last agent is detected and known limitations
 
-The last agent is simply the last one the extension sent to in this workspace,
-either with `Ctrl+'` or by picking it with `Ctrl+Shift+'`. Switching to another
-agent's panel and working in it manually will not turn it into the last agent.
-This is mainly because VS Code does not have a reliable way to determine which
-panel of an extension was opened / focused last (or at least I haven't found
-one).
+The last agent is simply the last one the extension sent to in this workspace.
+Any action that chose an agent, whether to send selections to it or to open its
+chat, will mark it as the last agent. 
+
+Switching to another agent's panel and working in it manually will not turn it
+into the last agent. This is mainly because VS Code does not have a reliable way
+to determine which panel of an extension was opened / focused last (or at least
+I haven't found one).
 
 There are ways to work around this. For example, if you always keep your agents
 in the secondary side bar you can overwrite the keybindings to something like
@@ -108,15 +117,27 @@ this, which is what I use (you could use `cmd+'` instead of `ctrl+'` on macOS):
 ```json
     {
         "key": "ctrl+'",
-        "command": "addToAgentContext.sendToAgent",
+        "command": "addToAgentContext.sendSelectionToLastAgent",
         "args": "claude",
         "when": "editorTextFocus && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
     },
     {
         "key": "ctrl+'",
-        "command": "addToAgentContext.sendToAgent",
+        "command": "addToAgentContext.sendSelectionToLastAgent",
         "args": "codex",
         "when": "editorTextFocus && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
+    },
+    {
+        "key": "ctrl+'",
+        "command": "addToAgentContext.sendExplorerSelectionToLastAgent",
+        "args": "claude",
+        "when": "filesExplorerFocus && !inputFocus && activeAuxiliary == workbench.view.extension.claude-sidebar-secondary"
+    },
+    {
+        "key": "ctrl+'",
+        "command": "addToAgentContext.sendExplorerSelectionToLastAgent",
+        "args": "codex",
+        "when": "filesExplorerFocus && !inputFocus && activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
     },
     {
         "key": "ctrl+i",
@@ -131,6 +152,10 @@ this, which is what I use (you could use `cmd+'` instead of `ctrl+'` on macOS):
         "when": "activeAuxiliary == workbench.view.extension.codexSecondaryViewContainer"
     },
 ```
+
+The first two entries apply in an editor, and the next two do the same in the
+explorer. If the agent whose panel is open can't receive files and folders,
+`Ctrl+'` in the explorer opens the picker instead. (e.g. Claude Code without `pasteExplorerPathsDirectly`)
 
 ### Default agents
 
@@ -168,13 +193,9 @@ Agents are configured in `settings.json` under `addToAgentContext.agents`:
 | `command` | yes | Command that adds the current editor selection to the agent's context |
 | `label` | no | Name shown in the picker; defaults to the agent id |
 | `fileCommand` | no | Command that adds a file or folder, called with its URI; enables the agent in the explorer picker |
-| `openChatInSidebarCommand` | no | Command that opens the agent's chat in the sidebar and focuses it; used by Open Last Agent Chat in Sidebar and Open Agent Chat in Sidebar |
+| `openChatInSidebarCommand` | no | Command that opens the agent's chat in the sidebar and focuses it; used by Open Last Agent Chat in Sidebar and Open Agent Chat in Sidebar... |
 | `extensionId` | no | Extension providing the agent, only used to report that it isn't installed |
-
-The `command` is invoked once per selected line range, with that range as the
-editor's only selection, so every range reaches the agent even though agent
-commands usually read just the primary selection. The `fileCommand` is invoked
-once per selected file or folder.
+| `pasteExplorerPathsDirectly` | no | Experimental, off by default. Lets the agent receive files and folders from the explorer even without a `fileCommand`, as long as it has an `openChatInSidebarCommand`. Instead of calling `fileCommand`, it copies the paths to the clipboard, opens the agent's chat and pastes them into the chat input |
 
 ### Default keybindings
 
@@ -185,22 +206,22 @@ On Windows and Linux:
 ```json
 {
     "key": "ctrl+'",
-    "command": "addToAgentContext.sendToAgent",
+    "command": "addToAgentContext.sendSelectionToLastAgent",
     "when": "editorTextFocus"
 },
 {
     "key": "ctrl+shift+'",
-    "command": "addToAgentContext.pickAction",
+    "command": "addToAgentContext.sendSelectionToAgent",
     "when": "editorTextFocus"
 },
 {
     "key": "ctrl+'",
-    "command": "addToAgentContext.copyFilePaths",
+    "command": "addToAgentContext.sendExplorerSelectionToLastAgent",
     "when": "filesExplorerFocus && !inputFocus"
 },
 {
     "key": "ctrl+shift+'",
-    "command": "addToAgentContext.pickFileAction",
+    "command": "addToAgentContext.sendExplorerSelectionToAgent",
     "when": "filesExplorerFocus && !inputFocus"
 }
 ```
@@ -210,32 +231,25 @@ On macOS:
 ```json
 {
     "key": "cmd+'",
-    "command": "addToAgentContext.sendToAgent",
+    "command": "addToAgentContext.sendSelectionToLastAgent",
     "when": "editorTextFocus"
 },
 {
     "key": "cmd+shift+'",
-    "command": "addToAgentContext.pickAction",
+    "command": "addToAgentContext.sendSelectionToAgent",
     "when": "editorTextFocus"
 },
 {
     "key": "cmd+'",
-    "command": "addToAgentContext.copyFilePaths",
+    "command": "addToAgentContext.sendExplorerSelectionToLastAgent",
     "when": "filesExplorerFocus && !inputFocus"
 },
 {
     "key": "cmd+shift+'",
-    "command": "addToAgentContext.pickFileAction",
+    "command": "addToAgentContext.sendExplorerSelectionToAgent",
     "when": "filesExplorerFocus && !inputFocus"
 }
 ```
-
-Just remove them if you only want to use the Command Palette, or update them to
-whatever works for you. To do that, search for `addToAgentContext` in
-**Preferences: Open Keyboard Shortcuts**, or add an entry to your
-`keybindings.json` with the command prefixed by `-`. See
-[How the last agent is detected and known limitations](#how-the-last-agent-is-detected-and-known-limitations)
-for an example of custom keybindings.
 
 ### Suggested additional keybindings
 
@@ -266,25 +280,18 @@ https://github.com/user-attachments/assets/389899de-4577-46f1-9c24-c3c9f1a6df84
 
 ## How selections are modelled
 
-The extension works with lines, not characters. Every selection in the editor
-is turned into the range of lines it covers, and those ranges are what gets
-copied or sent to an agent. Once you think of your selections as line ranges,
-the result is predictable:
+The extension defines "selection" slightly differently from how VSCode defines
+an editor selection. Its meaning depends on whether you want to add code snippets
+from an open editor or from the file explorer.
 
-- **A partial line counts as the whole line.** Selecting a single word on line
-  42 gives `foo.ts:42`.
-- **Whole-line selections don't spill over.** Selecting lines with
-  `shift+down` or by dragging the line numbers leaves the cursor at the start
-  of the next line. That line has nothing selected, so it isn't included.
-- **Plain cursors are ignored.** A cursor with nothing selected adds no lines.
-  If there is no selection at all, you get the path to the whole file.
-- **Order doesn't matter.** Ranges are sorted by line, whichever order you made
-  the selections in.
-- **Ranges that share a line are merged.** `11-22` and `22-26` become `11-26`,
-  and a range inside another one disappears into it. Ranges on neighboring
-  lines, like `1-2` and `3-4`, stay separate.
+### Selections in the open editor
 
-For example:
+In this case, a selection will be represented as a file path, followed by line
+references at the end of the path.
+
+The smallest unit of an editor selection is a line reference. Every VSCode
+selection in the editor is turned into the range of lines it covers, and those
+ranges are what gets copied or sent to an agent. Here are some examples:
 
 | Selections | Result |
 |---|---|
@@ -294,9 +301,48 @@ For example:
 | lines 34-46, then 11-22 | `/Users/you/project/src/foo.ts:11-22,34-46` |
 | lines 11-22 and 22-26 | `/Users/you/project/src/foo.ts:11-26` |
 
+Note that the order in which you created selections doesn't matter. The line
+number references at the end will always be written in ascending order.
+
 There are various ways to create selections, especially with keyboard shortcuts.
 For a simple way to test how this works, you can make multiple selections by
 holding `alt` and making selections with the mouse.
+
+### Selections in the file explorer
+
+In this case, a selection will be represented as one or more absolute paths of
+files or folders, without any line references.
+
+The smallest unit of an explorer selection is a file or folder. VSCode tracks
+two things in the explorer: the selected items, shown with a filled highlight,
+and the focused item, shown with an outline (this typically appears when moving
+with the keyboard through the explorer content). The extension follows the same
+rule as VSCode's built-in **Copy Path** to decide which of them it uses. Here
+are some examples:
+
+| Explorer state | Result |
+|---|---|
+| `foo.ts` focused, nothing selected | `/Users/you/project/src/foo.ts` |
+| `foo.ts` selected and focused | `/Users/you/project/src/foo.ts` |
+| `foo.ts` selected, `bar.ts` focused | `/Users/you/project/src/bar.ts` |
+| `foo.ts` and `bar.ts` selected, `baz.ts` focused | `/Users/you/project/src/foo.ts` and `/Users/you/project/src/bar.ts` |
+| the `src` folder selected and focused | `/Users/you/project/src` |
+
+The extension does not items focused when hovering with the mouse.
+
+> Note that with a single selected item, moving the keyboard cursor away from it
+makes the extension use the focused item instead. With two or more selected
+items, the selection is always used, wherever the keyboard cursor is. To be
+honest, I find this behavior weird. See below for the two cases:
+
+| One item selected | Two items selected |
+|---|---|
+| ![README.md selected, keyboard cursor moved to another file](assets/explorer-single-selection.png) | ![README.md and tsconfig.json selected, package.json focused](assets/explorer-multiple-selection.png) |
+
+There are various ways to select multiple items. For a simple way to test how
+this works, you can hold `ctrl` (`cmd` on macOS) and click items with the mouse,
+or hold `shift` and move with the arrow keys to select a range.
+
 
 ## Troubleshooting and known issues
 
@@ -318,3 +364,7 @@ problem is with the extension's native command.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to run the extension locally and
 how to submit changes.
+
+## Related issues
+
+- https://github.com/microsoft/vscode/issues/339786 and https://github.com/microsoft/vscode/issues/316820 for being able to read from file explorer via an API.

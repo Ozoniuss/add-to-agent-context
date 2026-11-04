@@ -54,7 +54,7 @@ interface Agent extends AgentConfig {
   installed: boolean;
 }
 
-/** An entry in the `pickAction` quick pick. */
+/** An entry in the `sendSelectionToAgent` quick pick. */
 interface ActionItem extends vscode.QuickPickItem {
   /** Agent to send to, or `null` for the "Copy to clipboard" entry. */
   agentId: string | null;
@@ -62,7 +62,7 @@ interface ActionItem extends vscode.QuickPickItem {
   available?: boolean;
 }
 
-/** An entry in the `pickFileAction` quick pick. */
+/** An entry in the `sendExplorerSelectionToAgent` quick pick. */
 interface FileActionItem extends vscode.QuickPickItem {
   /** Agent to send to, or `null` for the "Copy to clipboard" entry. */
   agent: Agent | null;
@@ -282,7 +282,7 @@ async function sendUrisToAgent(agent: Agent, uris: vscode.Uri[]): Promise<void> 
   }
 }
 
-async function sendFilesToAgentHandler(
+async function sendExplorerSelectionToLastAgentHandler(
   context: vscode.ExtensionContext,
   agentId?: string
 ): Promise<void> {
@@ -301,10 +301,10 @@ async function sendFilesToAgentHandler(
       return;
     }
   }
-  await vscode.commands.executeCommand('addToAgentContext.pickFileAction');
+  await vscode.commands.executeCommand('addToAgentContext.sendExplorerSelectionToAgent');
 }
 
-async function pickFileActionHandler(context: vscode.ExtensionContext): Promise<void> {
+async function sendExplorerSelectionToAgentHandler(context: vscode.ExtensionContext): Promise<void> {
   const uris = await selectedExplorerUris();
   if (uris.length === 0) {
     return;
@@ -350,14 +350,14 @@ async function pickFileActionHandler(context: vscode.ExtensionContext): Promise<
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const copy = vscode.commands.registerCommand('addToAgentContext.copy', async () => {
+  const copySelectionPath = vscode.commands.registerCommand('addToAgentContext.copySelectionPath', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
     await vscode.env.clipboard.writeText(formatPath(editor));
   });
 
-  const sendToAgent = vscode.commands.registerCommand(
-    'addToAgentContext.sendToAgent',
+  const sendSelectionToLastAgent = vscode.commands.registerCommand(
+    'addToAgentContext.sendSelectionToLastAgent',
     async (agentId?: string) => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) return;
@@ -370,11 +370,11 @@ export function activate(context: vscode.ExtensionContext): void {
           return;
         }
       }
-      await vscode.commands.executeCommand('addToAgentContext.pickAction');
+      await vscode.commands.executeCommand('addToAgentContext.sendSelectionToAgent');
     }
   );
 
-  const pickAction = vscode.commands.registerCommand('addToAgentContext.pickAction', async () => {
+  const sendSelectionToAgent = vscode.commands.registerCommand('addToAgentContext.sendSelectionToAgent', async () => {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
 
@@ -463,32 +463,32 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
-  const copyFilePaths = vscode.commands.registerCommand(
-    'addToAgentContext.copyFilePaths',
+  const copyExplorerPaths = vscode.commands.registerCommand(
+    'addToAgentContext.copyExplorerPaths',
     async () => {
       await vscode.commands.executeCommand('copyFilePath');
     }
   );
 
-  const sendFilesToAgent = vscode.commands.registerCommand(
-    'addToAgentContext.sendFilesToAgent',
-    (agentId?: string) => sendFilesToAgentHandler(context, agentId)
+  const sendExplorerSelectionToLastAgent = vscode.commands.registerCommand(
+    'addToAgentContext.sendExplorerSelectionToLastAgent',
+    (agentId?: string) => sendExplorerSelectionToLastAgentHandler(context, agentId)
   );
 
-  const pickFileAction = vscode.commands.registerCommand(
-    'addToAgentContext.pickFileAction',
-    () => pickFileActionHandler(context)
+  const sendExplorerSelectionToAgent = vscode.commands.registerCommand(
+    'addToAgentContext.sendExplorerSelectionToAgent',
+    () => sendExplorerSelectionToAgentHandler(context)
   );
 
   context.subscriptions.push(
-    copy,
-    sendToAgent,
-    pickAction,
+    copySelectionPath,
+    sendSelectionToLastAgent,
+    sendSelectionToAgent,
     openLastChatInSidebar,
     openChatInSidebar,
-    copyFilePaths,
-    sendFilesToAgent,
-    pickFileAction
+    copyExplorerPaths,
+    sendExplorerSelectionToLastAgent,
+    sendExplorerSelectionToAgent
   );
   registerSelectionPopup(context);
 }
@@ -594,10 +594,10 @@ function registerSelectionPopup(context: vscode.ExtensionContext): void {
         // send html to avoid the tooltip displayed when hovering over the actual
         // link text
         links.push(
-          `<a href="command:addToAgentContext.sendToAgent?${args}">$(comment-discussion) Add to ${escapeHtml(agent.label)}</a>`
+          `<a href="command:addToAgentContext.sendSelectionToLastAgent?${args}">$(comment-discussion) Add to ${escapeHtml(agent.label)}</a>`
         );
       }
-      links.push('<a href="command:addToAgentContext.copy">$(clippy) Copy to clipboard</a>');
+      links.push('<a href="command:addToAgentContext.copySelectionPath">$(clippy) Copy to clipboard</a>');
 
       const markdown = new vscode.MarkdownString(links.join('&nbsp;&nbsp;|&nbsp;&nbsp;'), true);
       markdown.isTrusted = true;
