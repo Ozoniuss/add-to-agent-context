@@ -269,7 +269,7 @@ async function sendUrisToAgent(agent: Agent, uris: vscode.Uri[]): Promise<void> 
     }
     const paths: string[] = [];
     for (const uri of uris) {
-      paths.push(uri.fsPath);
+      paths.push('@' + uri.fsPath);
     }
     await pastePathsIntoChat(agent.openChatInSidebarCommand, paths);
     return;

@@ -24,8 +24,9 @@
   Selection to Agent...** (`addToAgentContext.sendExplorerSelectionToAgent`)
   can send to that agent even without a `fileCommand`, which makes them usable
   with Claude Code. Instead of calling the agent's `fileCommand`, it copies the
-  selected paths to the clipboard, opens the agent's chat and pastes them into
-  its input. The paths stay on the clipboard. This is a workaround for agents
+  absolute paths of the selected items to the clipboard, each prefixed with `@`,
+  opens the agent's chat and pastes them into its input. The paths stay on the
+  clipboard. This is a workaround for agents
   that have no command to add a file or folder to their context, such as Claude
   Code (see
   [anthropics/claude-code#97535](https://github.com/anthropics/claude-code/issues/97535)),

@@ -173,7 +173,7 @@
                 "type": "boolean",
                 "default": false,
                 "description": "Experimental: paste the paths of files and folders selected in the explorer into the agent's chat instead of calling fileCommand",
-                "markdownDescription": "**Experimental.** Lets `addToAgentContext.sendExplorerSelectionToLastAgent` and `addToAgentContext.sendExplorerSelectionToAgent` send to the agent even without a `fileCommand`, as long as it has an `openChatInSidebarCommand`. Instead of calling `fileCommand`, it copies the absolute paths of the selected files and folders to the clipboard separated by spaces, opens the agent's chat with `openChatInSidebarCommand` and pastes them into the chat input. The paths stay on the clipboard, so if the paste doesn't land, paste them into the chat yourself."
+                "markdownDescription": "**Experimental.** Lets `addToAgentContext.sendExplorerSelectionToLastAgent` and `addToAgentContext.sendExplorerSelectionToAgent` send to the agent even without a `fileCommand`, as long as it has an `openChatInSidebarCommand`. Instead of calling `fileCommand`, it copies the absolute paths of the selected files and folders to the clipboard, each prefixed with `@` and separated by spaces, opens the agent's chat with `openChatInSidebarCommand` and pastes them into the chat input. The paths stay on the clipboard, so if the paste doesn't land, paste them into the chat yourself."
               }
             }
           }

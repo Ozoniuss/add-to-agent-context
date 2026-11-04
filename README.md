@@ -195,7 +195,7 @@ Agents are configured in `settings.json` under `addToAgentContext.agents`:
 | `fileCommand` | no | Command that adds a file or folder, called with its URI; enables the agent in the explorer picker |
 | `openChatInSidebarCommand` | no | Command that opens the agent's chat in the sidebar and focuses it; used by Open Last Agent Chat in Sidebar and Open Agent Chat in Sidebar... |
 | `extensionId` | no | Extension providing the agent, only used to report that it isn't installed |
-| `pasteExplorerPathsDirectly` | no | Experimental, off by default. Lets the agent receive files and folders from the explorer even without a `fileCommand`, as long as it has an `openChatInSidebarCommand`. Instead of calling `fileCommand`, it copies the paths to the clipboard, opens the agent's chat and pastes them into the chat input |
+| `pasteExplorerPathsDirectly` | no | Experimental, off by default. Lets the agent receive files and folders from the explorer even without a `fileCommand`, as long as it has an `openChatInSidebarCommand`. Instead of calling `fileCommand`, it copies the absolute paths to the clipboard, each prefixed with `@`, opens the agent's chat and pastes them into the chat input |
 
 ### Default keybindings
 
