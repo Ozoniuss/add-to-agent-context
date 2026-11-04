@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.0
 
 - [BREAKING] Commands are renamed so their IDs and titles say what they act on
   and where they send it. Update any keybindings that use the old IDs.
