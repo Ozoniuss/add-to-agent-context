@@ -2,7 +2,7 @@
   "name": "add-to-agent-context",
   "displayName": "Add to Agent Context",
   "description": "Copies the active file's full path with the selected line range, or adds it straight into a coding agent's context.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "publisher": "ozoniuss",
   "icon": "assets/icon.png",
   "engines": {
@@ -128,6 +128,7 @@
               "label": "Claude Code",
               "extensionId": "anthropic.claude-code",
               "command": "claude-vscode.insertAtMention",
+              "fileCommand": "claude-vscode.addToChat",
               "openChatInSidebarCommand": "claudeVSCodeSidebarSecondary.focus",
               "pasteExplorerPathsDirectly": false
             },

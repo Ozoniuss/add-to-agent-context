@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.1.0
+
+- The default Claude Code agent now has a `fileCommand`,
+  `claude-vscode.addToChat`, so you can send files and folders to Claude Code
+  from the explorer directly without the experimental
+  `pasteExplorerPathsDirectly` workaround. Requires Claude Code 2.1.327 or
+  later
+  ([anthropics/claude-code#97535](https://github.com/anthropics/claude-code/issues/97535)).
+  With older versions, you need to turn the workaround on for it to work, by
+  setting `pasteExplorerPathsDirectly` to `true` on the `claude` agent in
+  `addToAgentContext.agents`:
+
+  ```json
+  "addToAgentContext.agents": {
+      "claude": { "pasteExplorerPathsDirectly": true }
+  }
+  ```
+
 ## 2.0.0
 
 - [BREAKING] Commands are renamed so their IDs and titles say what they act on

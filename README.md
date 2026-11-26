@@ -83,22 +83,6 @@ Context: Open Agent Chat in Sidebar...** (`addToAgentContext.openChatInSidebar`)
 
 > The commands above were only tested when agents are opened in the sidebar.
 
-Note that not all agents have a command that accepts a file URI. In
-particular, Claude Code can only mention the file open in the active editor, so
-by default it can't be sent files or folders from the explorer. I opened
-[anthropics/claude-code#97535](https://github.com/anthropics/claude-code/issues/97535)
-asking for a command that adds a file or folder to the chat, like Codex's
-`chatgpt.addFileToThread`. In the meantime, there is an experimental workaround,
-off by default: set `pasteExplorerPathsDirectly` on the agent, and the extension
-pastes the paths into the agent's chat instead. For Claude Code, add this to
-`settings.json`:
-
-```json
-"addToAgentContext.agents": {
-    "claude": { "pasteExplorerPathsDirectly": true }
-}
-```
-
 ### How the last agent is detected and known limitations
 
 The last agent is simply the last one the extension sent to in this workspace.
@@ -155,13 +139,13 @@ this, which is what I use (you could use `cmd+'` instead of `ctrl+'` on macOS):
 
 The first two entries apply in an editor, and the next two do the same in the
 explorer. If the agent whose panel is open can't receive files and folders,
-`Ctrl+'` in the explorer opens the picker instead. (e.g. Claude Code without `pasteExplorerPathsDirectly`)
+`Ctrl+'` in the explorer opens the picker instead.
 
 ### Default agents
 
 | Id | Agent | Editor selection | Explorer files and folders | Open chat |
 |---|---|---|---|---|
-| `claude` | Claude Code | yes | no | yes |
+| `claude` | Claude Code | yes | yes (2.1.327 or later) | yes |
 | `codex` | Codex | yes | yes | yes |
 
 An agent is still listed in the picker when its extension isn't installed, but
@@ -359,6 +343,23 @@ The command "Codex: Add to Codex Thread" does not seem to work for some files
 (e.g. VS Code's keybindings.json file). It's not clear yet for which kind of
 files it doesn't work. If you can't send snippets to Codex, also check if the
 problem is with the extension's native command.
+
+### Claude Code isn't available to send files from the explorer
+
+Claude Code before version 2.1.327 has no command to add files or folders to
+its chat, so it isn't offered for explorer selections. The same applies to any
+agent without a `fileCommand`. As a workaround, set the
+experimental `pasteExplorerPathsDirectly` to `true` on the agent, which pastes
+the paths into its chat instead. For example, in `settings.json`:
+
+```json
+"addToAgentContext.agents": {
+    "claude": { "pasteExplorerPathsDirectly": true }
+}
+```
+
+Add to Agent Context uses Claude Code's built-in command by default from
+version 2.1.0.
 
 ## Contributing
 
